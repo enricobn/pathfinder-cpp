@@ -1,5 +1,9 @@
 #CPPFLAGS = -lglut -lGLU
-all : field_test.bin move_example.bin
+all : field_test.bin move_example.bin container_test.bin
+
+container_test.bin : container_test.o
+	@echo 'Building $@'
+	g++ -g -lglut -lGLU $^ -o $@
 
 move_example.bin : move_example.o astar_pathfinder.o field.o
 	@echo 'Building $@'
@@ -11,7 +15,7 @@ field_test.bin : field_test.o field.o
 
 %.o : %.cc
 	@echo 'Compiling $<'
-	g++ -g -O2 -pedantic -save-temps -Wall -c $<
+	g++ -g -O0 -pedantic -save-temps -Wall -c $<
 
 .PHONY : clean
 

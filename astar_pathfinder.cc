@@ -5,6 +5,7 @@
 #include <string.h>
 #include <limits.h>
 #include <algorithm>
+#include <vector>
 #include "globals.h"
 #include "astar_pathfinder.h"
 #include "field.h"
@@ -25,6 +26,7 @@ class CPathNode {
         point_t get_point();
         int get_F();
         bool operator ==(const CPathNode other);
+        void print();
 };
 
 CPathNode::CPathNode(CPathNode *parent, point_t point, point_t to) {
@@ -33,6 +35,10 @@ CPathNode::CPathNode(CPathNode *parent, point_t point, point_t to) {
     _H = (abs(to.x - _point.x) + abs(to.y - _point.y)) * 10;    
     _G = G_vs(parent);
     _F = _H + _G;
+}
+
+void CPathNode::print() {
+    printf("this = %p parent = %p (%d, %d) = %d)\n", this, _parent, _point.x, _point.y, _F); 
 }
 
 int CPathNode::G_vs(CPathNode *vs) {
@@ -105,24 +111,30 @@ static vector<CPathNode> open;
 static vector<CPathNode> closed;
 
 CPathNode *get_path_internal(CField field, point_t from, point_t to) {
+//    open.reserve(10000);
+//    closed.reserve(10000);
     open.clear();
     closed.clear();
     
-    CPathNode from_node = CPathNode(NULL, from, to); 
-    open.push_back(from_node);
+    CPathNode *from_node = new CPathNode(NULL, from, to); 
+    open.push_back(*from_node);
 
     CPathNode *target_node = NULL;
-    
+
     while (TRUE) {
-        printf("%Zu\n", open.size());
+//        printf("%u %d\n", open.size(), i++);
         if (open.empty()) {
             return NULL;
         }
         int min = INT_MAX;
         CPathNode *min_node = NULL;
         
-        for (unsigned int i = 0; i < open.size(); i++) {
-            CPathNode node = open[i];
+        int i = 0;
+        vector<CPathNode>::iterator it;
+        for (it = open.begin(); it != open.end(); it++ ) {
+            CPathNode node = *it;
+//            printf("node = %p %d\n", &node, i++);
+//            node.print();
 
 //       	    if (&node == node.get_parent()) {
 //                printf("are equals!!!\n");
@@ -138,8 +150,11 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
             }
         }
         
+//        printf("min_node = %p\n", min_node);
+        
         if (point_equals(min_node->get_point(), to)) {
-            target_node = min_node;
+            target_node = (CPathNode *)malloc(sizeof(CPathNode));
+            memcpy(target_node, min_node, sizeof(CPathNode));
             break;
         }
 
@@ -150,18 +165,20 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
 /*            printf("adjacent=%d,%d\n", point.x, point.y);*/
             // I do not consider the end point to be occupied, so I can move towards it
             if (field.contains(point) && (point_equals(point, to) || !field.is_occupied(point))) {
-                CPathNode node = CPathNode(min_node, point, to);
+                CPathNode *node = new CPathNode(min_node, point, to);
+//                printf("node created: ");
+//               (*node).print(); 
 /*
           	    if (&node == &node->parent) {
                     printf("created: are equals!!!\n");
                 }
 */
-                vector<CPathNode>::iterator iClosed = std::find(closed.begin(), closed.end(), node);
+                vector<CPathNode>::iterator iClosed = std::find(closed.begin(), closed.end(), *node);
                 if (iClosed == closed.end()) {
-                    vector<CPathNode>::iterator iOpen = std::find(open.begin(), open.end(), node);
+                    vector<CPathNode>::iterator iOpen = std::find(open.begin(), open.end(), *node);
                     if (iOpen == open.end()) {
 //                        printf("not found\n");
-                        open.push_back(node);
+                        open.push_back(*node);
 //                        printf("pushed %d\n", node);
 //	               	    if (node == node.get_parent()) {
 //                            printf("added: are equals!!!\n");
@@ -203,12 +220,18 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
 }
 
 point_t *get_next_to_path(CField field, point_t from, point_t to) {
-    CPathNode target_node = *get_path_internal(field, from, to);
+    CPathNode *target_node = get_path_internal(field, from, to);
+    if (target_node == NULL) {
+        open.clear();
+        closed.clear();
+        return NULL;
+    }
 
     point_t *point = NULL;   
     
     int i = 0;
-    while (target_node.get_parent() != NULL) {
+    while (target_node->get_parent() != NULL) {
+//        printf("cucu\n");
 //	    if (*target_node == *target_node.get_parent()) {
 //            printf("are equals!!!\n");
 //        } else {
@@ -216,13 +239,13 @@ point_t *get_next_to_path(CField field, point_t from, point_t to) {
 //            printf("target_node parent %d, %d, %d\n", target_node->parent, target_node->parent->point.x, target_node->parent->point.y);
 //        }
         /* the path can contains occupied points. Tipically it can be only the end point */ 
-        if (!field.is_occupied(target_node.get_point())) {
-            point = &target_node.get_point(); 
+        if (!field.is_occupied(target_node->get_point())) {
+            point = &target_node->get_point(); 
         }
-        target_node = *target_node.get_parent();
+        target_node = target_node->get_parent();
     }
 
-    /* I copy it so I can completely free open and closed lists */
+    /* I copy it so I can completely free open and closed vectors */
     point_t *result = NULL;
     if (point != NULL) {
         result = (point_t *)malloc(sizeof(point_t));

@@ -121,7 +121,7 @@ void animate() {
     printf("animate start\n");
     int i;
     for (i = 0; i < moving_shapes_count * 2; i++) {
-        printf("movong_shape %d\n", i);
+        printf("moving_shape %d\n", i);
         if (point_equals(moving_shapes[i].shape->point, moving_shapes[i].end)) {
             continue;
         }
