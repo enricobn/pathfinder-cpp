@@ -55,7 +55,7 @@ void test_vector() {
         (node.get())->print();
     }
     
-    printf("\iterated nodes\n");
+    printf("iterated nodes\n");
     
     vector<Node_ptr>::iterator it; 
 	for (it = nodes.begin(); it != nodes.end(); it++ ) {

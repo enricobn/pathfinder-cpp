@@ -13,7 +13,7 @@ field_test.bin : field_test.o field.o
 	@echo 'Building $@'
 	g++ -g $^ -o $@
 
-%.o : %.cc
+%.o : %.cpp
 	@echo 'Compiling $<'
 	g++ -g -O2 -pedantic -save-temps -Wall -c $<
 

@@ -6,9 +6,9 @@
 #include <limits.h>
 #include <algorithm>
 #include <vector>
-#include "globals.h"
-#include "astar_pathfinder.h"
-#include "field.h"
+#include "globals.hpp"
+#include "astar_pathfinder.hpp"
+#include "field.hpp"
 
 #define null 0
 

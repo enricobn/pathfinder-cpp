@@ -4,9 +4,9 @@
  */
 #include <unistd.h>
 #include <GL/glut.h>
-#include "globals.h"
-#include "field.h"
-#include "astar_pathfinder.h"
+#include "globals.hpp"
+#include "field.hpp"
+#include "astar_pathfinder.hpp"
 
 #define WIDTH 100
 #define HEIGHT 100
