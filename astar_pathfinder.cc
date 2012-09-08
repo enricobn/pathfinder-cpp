@@ -107,6 +107,17 @@ static point_t *get_adjacents(point_t point) {
     return adjacents_tmp;
 }
 
+int find_node(vector<CPathNode *> nodes, CPathNode *node) {
+    vector<CPathNode*>::iterator it;
+    for (it = nodes.begin(); it != nodes.end(); it++ ) {
+        CPathNode *iNode = *it;
+        if (*iNode == *node) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
 static vector<CPathNode*> open;
 static vector<CPathNode*> closed;
 
@@ -122,7 +133,7 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
     CPathNode *target_node = NULL;
 
     while (TRUE) {
-//        printf("%u %d\n", open.size(), i++);
+//        printf("%u \n", open.size());
         if (open.empty()) {
             return NULL;
         }
@@ -166,6 +177,9 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
             // I do not consider the end point to be occupied, so I can move towards it
             if (field.contains(point) && (point_equals(point, to) || !field.is_occupied(point))) {
                 CPathNode *node = new CPathNode(min_node, point, to);
+                if (node == NULL) {
+                    ERROR("Error allocating new node");
+                }
 //                printf("node created: ");
 //               (*node).print(); 
 /*
@@ -173,10 +187,10 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
                     printf("created: are equals!!!\n");
                 }
 */
-                vector<CPathNode*>::iterator iClosed = std::find(closed.begin(), closed.end(), node);
-                if (iClosed == closed.end()) {
-                    vector<CPathNode*>::iterator iOpen = std::find(open.begin(), open.end(), node);
-                    if (iOpen == open.end()) {
+//                vector<CPathNode*>::iterator iClosed = std::find(closed.begin(), closed.end(), node);
+                if (!find_node(closed, node)) {
+//                    vector<CPathNode*>::iterator iOpen = std::find(open.begin(), open.end(), node);
+                    if (!find_node(open, node)) {
 //                        printf("not found\n");
                         open.push_back(node);
 //                        printf("pushed %d\n", node);
@@ -194,10 +208,10 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
                             node->F = path_node_F(node);
                         }
 */
-//                        free(node);
+                        free(node);
                     }
                 } else {
-//                    free(node);
+                    free(node);
                 }
 //                free(node);
 /*
@@ -223,7 +237,11 @@ void clear(vector<CPathNode*> nodes) {
     vector<CPathNode*>::iterator it;
     for (it = nodes.begin(); it != nodes.end(); it++ ) {
         CPathNode *node = *it;
-        free(node);
+        try {
+            free(node);
+        } catch(...) {
+            ERROR("Error freeing vector elements");
+        }
     }
     nodes.clear(); 
 }

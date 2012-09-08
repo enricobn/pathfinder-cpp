@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <vector>
 using namespace std;
 
@@ -18,6 +19,9 @@ struct shape_s {
     point_t point;
     dimension_t dimension;
     void (*draw)(struct shape_s shape);
+    void print() {
+        printf("shape(%d, %d)\n", point.x, point.y); 
+    };
 };
 
 typedef struct shape_s shape_t;

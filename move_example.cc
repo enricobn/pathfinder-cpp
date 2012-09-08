@@ -23,7 +23,7 @@ typedef struct {
 
 CField field({WIDTH, HEIGHT});
 
-static const int moving_shapes_count = 49;
+static const int moving_shapes_count = 50;
 
 moving_shape_t *moving_shapes = NULL;
 
@@ -122,7 +122,8 @@ void display(void)
 void animate() {
 //    printf("animate start\n");
     for (int i = 0; i < moving_shapes_count * 2; i++) {
-//        printf("moving_shape %d\n", i);
+//        printf("moving_shape %d ", i);
+//        moving_shapes[i].shape->print();
         if (point_equals(moving_shapes[i].shape->point, moving_shapes[i].end)) {
             continue;
         }
