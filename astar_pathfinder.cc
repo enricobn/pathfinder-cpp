@@ -108,9 +108,8 @@ static point_t *get_adjacents(point_t point) {
 }
 
 int find_node(vector<CPathNode *> nodes, CPathNode *node) {
-    vector<CPathNode*>::iterator it;
-    for (it = nodes.begin(); it != nodes.end(); it++ ) {
-        CPathNode *iNode = *it;
+    for (int i = 0; i < nodes.size(); i++ ) {
+        CPathNode *iNode = nodes[i];
         if (*iNode == *node) {
             return TRUE;
         }
