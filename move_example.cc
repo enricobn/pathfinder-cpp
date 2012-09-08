@@ -23,7 +23,7 @@ typedef struct {
 
 CField field({WIDTH, HEIGHT});
 
-int moving_shapes_count = 50;
+static const int moving_shapes_count = 49;
 
 moving_shape_t *moving_shapes = NULL;
 
@@ -60,13 +60,13 @@ void green_draw(shape_t rectangle) {
 void field_init() {
     field = CField::CField({WIDTH, HEIGHT});
 
-    field.add(*rectangle_new(10, 10, 10, 10, white_draw));
+    field.add(rectangle_new(10, 10, 10, 10, white_draw));
 
-    field.add(*rectangle_new(40, 20, 20, 20, white_draw));
+    field.add(rectangle_new(40, 20, 20, 20, white_draw));
     
-    field.add(*rectangle_new(40, 60, 20, 20, white_draw));
+    field.add(rectangle_new(40, 60, 20, 20, white_draw));
 
-    field.add(*rectangle_new(75, 75, 10, 10, white_draw));
+    field.add(rectangle_new(75, 75, 10, 10, white_draw));
     
     moving_shapes = (moving_shape_t *) malloc(sizeof(moving_shape_t) * moving_shapes_count * 2);    
     
@@ -76,28 +76,29 @@ void field_init() {
         moving_shapes[2 * i].shape = p1;
         moving_shapes[2 * i].end.x = 90;
         moving_shapes[2 * i].end.y = 99 -i;
-        field.add(*p1);
+        field.add(p1);
 
         shape_t *p2 = rectangle_new(99, 99 -i, 1, 1, blue_draw);
         moving_shapes[2 * i +1].shape = p2;
         moving_shapes[2 * i + 1].end.x = 0;
         moving_shapes[2 * i + 1].end.y = moving_shapes_count -i;
-        field.add(*p2);
+        field.add(p2);
     }
 }
 
 void display(void)
 {
-    printf("display start\n");
+//    printf("display start\n");
 /* clear all pixels  */
     glClear (GL_COLOR_BUFFER_BIT);
 
     for (unsigned int i = 0; i < field.get_shapes().size(); i++) {
-        shape_t s = field.get_shapes()[i];
+        shape_t *s = field.get_shapes()[i];
         glColor3f (1.0, 1.0, 1.0);
-        s.draw(s);
+        s->draw(*s);
     }
 
+/*   
     {
         int i;
         for (i = 0; i < moving_shapes_count * 2; i++) {
@@ -105,7 +106,8 @@ void display(void)
             moving_shapes[i].shape->draw(*moving_shapes[i].shape);
         }
     }
-    
+*/
+
 /*    list_free(shapes, FALSE);*/
     
 /* don't wait!  
@@ -114,14 +116,13 @@ void display(void)
    glFlush ();
 /*   usleep(100);*/
    glutSwapBuffers();
-   printf("display end\n");
+//   printf("display end\n");
 }
 
 void animate() {
-    printf("animate start\n");
-    int i;
-    for (i = 0; i < moving_shapes_count * 2; i++) {
-        printf("moving_shape %d\n", i);
+//    printf("animate start\n");
+    for (int i = 0; i < moving_shapes_count * 2; i++) {
+//        printf("moving_shape %d\n", i);
         if (point_equals(moving_shapes[i].shape->point, moving_shapes[i].end)) {
             continue;
         }
@@ -143,9 +144,9 @@ void animate() {
     Normally openGL doesn't continuously draw frames. It puts one in place and waits for you to tell him what to do next.
      Calling glutPostRedisplay() forces a redraw with the new angle
  */
-    printf("before redisplay\n");
+//    printf("before redisplay\n");
     glutPostRedisplay();
-    printf("animate end\n");
+//    printf("animate end\n");
 }
 
 void init (void) 

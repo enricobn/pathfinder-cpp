@@ -32,7 +32,7 @@ class CPathNode {
 CPathNode::CPathNode(CPathNode *parent, point_t point, point_t to) {
     _parent = parent;
     _point = point;
-    _H = (abs(to.x - _point.x) + abs(to.y - _point.y)) * 10;    
+    _H = (abs(to.x - point.x) + abs(to.y - point.y)) * 10;    
     _G = G_vs(parent);
     _F = _H + _G;
 }
@@ -45,7 +45,7 @@ int CPathNode::G_vs(CPathNode *vs) {
     if (vs == NULL) {
         return 0;
     }
-    int g = _G;
+    int g = vs->_G;
     if (_point.x == vs->_point.x || _point.y == vs->_point.y) {
         g += 10;
     } else {
@@ -107,8 +107,8 @@ static point_t *get_adjacents(point_t point) {
     return adjacents_tmp;
 }
 
-static vector<CPathNode> open;
-static vector<CPathNode> closed;
+static vector<CPathNode*> open;
+static vector<CPathNode*> closed;
 
 CPathNode *get_path_internal(CField field, point_t from, point_t to) {
 //    open.reserve(10000);
@@ -117,7 +117,7 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
     closed.clear();
     
     CPathNode *from_node = new CPathNode(NULL, from, to); 
-    open.push_back(*from_node);
+    open.push_back(from_node);
 
     CPathNode *target_node = NULL;
 
@@ -130,23 +130,23 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
         CPathNode *min_node = NULL;
         
         int i = 0;
-        vector<CPathNode>::iterator it;
+        vector<CPathNode*>::iterator it;
         for (it = open.begin(); it != open.end(); it++ ) {
-            CPathNode node = *it;
-//            printf("node = %p %d\n", &node, i++);
-//            node.print();
+            CPathNode *node = *it;
+//            printf("iterating nodes ");
+//            node->print();
 
-//       	    if (&node == node.get_parent()) {
-//                printf("are equals!!!\n");
+       	    if (node == node->get_parent()) {
+                printf("node == node.parent!!!\n");
 //                printf("node %d = %d, %d\n", &node, node.point.x, node.point.y);
 //                printf("node parent %d = %d, %d\n", node.parent, node.parent->point.x, node.parent->point.y);
 //                exit(1);
-//            }
+            }
 
 //                printf("point=%d,%d=%d\n", node.point.x, node.point.y, node.F);
-            if (min_node == NULL || node.get_F() < min) {
-                min = node.get_F();
-                min_node = &node;
+            if (min_node == NULL || node->get_F() < min) {
+                min = node->get_F();
+                min_node = node;
             }
         }
         
@@ -173,12 +173,12 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
                     printf("created: are equals!!!\n");
                 }
 */
-                vector<CPathNode>::iterator iClosed = std::find(closed.begin(), closed.end(), *node);
+                vector<CPathNode*>::iterator iClosed = std::find(closed.begin(), closed.end(), node);
                 if (iClosed == closed.end()) {
-                    vector<CPathNode>::iterator iOpen = std::find(open.begin(), open.end(), *node);
+                    vector<CPathNode*>::iterator iOpen = std::find(open.begin(), open.end(), node);
                     if (iOpen == open.end()) {
 //                        printf("not found\n");
-                        open.push_back(*node);
+                        open.push_back(node);
 //                        printf("pushed %d\n", node);
 //	               	    if (node == node.get_parent()) {
 //                            printf("added: are equals!!!\n");
@@ -207,11 +207,11 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
             }
         }
 
-        vector<CPathNode>::iterator iOpen = std::find(open.begin(), open.end(), *min_node);
+        vector<CPathNode*>::iterator iOpen = std::find(open.begin(), open.end(), min_node);
 //        printf("open before %d\n", open.size());
         open.erase(iOpen);
 //        printf("open after %d\n", open.size());
-        closed.push_back(*min_node);
+        closed.push_back(min_node);
     }
 
 //    printf("found %d, %d\n", target_node->point.x, target_node->point.y);     
@@ -219,11 +219,20 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
     return target_node;
 }
 
+void clear(vector<CPathNode*> nodes) {
+    vector<CPathNode*>::iterator it;
+    for (it = nodes.begin(); it != nodes.end(); it++ ) {
+        CPathNode *node = *it;
+        free(node);
+    }
+    nodes.clear(); 
+}
+
 point_t *get_next_to_path(CField field, point_t from, point_t to) {
     CPathNode *target_node = get_path_internal(field, from, to);
     if (target_node == NULL) {
-        open.clear();
-        closed.clear();
+        clear(open);
+        clear(closed);
         return NULL;
     }
 
@@ -252,8 +261,8 @@ point_t *get_next_to_path(CField field, point_t from, point_t to) {
         memcpy(result, point, sizeof(point_t));
     }
     
-    open.clear();
-    closed.clear();
+    clear(open);
+    clear(closed);
 
     return result;
 }

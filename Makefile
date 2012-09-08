@@ -15,7 +15,7 @@ field_test.bin : field_test.o field.o
 
 %.o : %.cc
 	@echo 'Compiling $<'
-	g++ -g -O0 -pedantic -save-temps -Wall -c $<
+	g++ -g -O2 -pedantic -save-temps -Wall -c $<
 
 .PHONY : clean
 

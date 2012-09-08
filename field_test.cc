@@ -19,10 +19,10 @@ int main(int argc, char** argv) {
     /* test is_occupied */ 
     
     shape_t r1 = {{0, 0}, {10, 10}};
-    field.add(r1);
+    field.add(&r1);
 
     shape_t r2 = {{20, 20}, {10, 10}};
-    field.add(r2);
+    field.add(&r2);
     
     point_t p4 = {5, 5};
     assert(field.is_occupied(p4));

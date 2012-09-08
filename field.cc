@@ -8,10 +8,10 @@ CField::CField(dimension_t dimension) {
 int CField::is_occupied(point_t point) {
     int result = FALSE;
     for (unsigned int i =0; i < _shapes.size(); i++) {
-        shape_t element = _shapes[i];
-        if (point.x >= element.point.x && point.y >= element.point.y
-                && point.x <= (element.point.x + element.dimension.width - 1) 
-                && point.y <= (element.point.y + element.dimension.height - 1)) {
+        shape_t *element = _shapes[i];
+        if (point.x >= element->point.x && point.y >= element->point.y
+                && point.x <= (element->point.x + element->dimension.width - 1) 
+                && point.y <= (element->point.y + element->dimension.height - 1)) {
              /* I cannot exit from a FOREACH without LIST_FOREACH_END, so I cannot return TRUE here! */
              result = TRUE;
              break;
@@ -26,11 +26,11 @@ int CField::contains(point_t point) {
         && point.y <= _dimension.height);
 }
 
-void CField::add(shape_t shape) {
+void CField::add(shape_t *shape) {
     _shapes.push_back(shape);
 }
 
-vector<shape_t> CField::get_shapes() {
+vector<shape_t *> CField::get_shapes() {
     return _shapes;
 }
 

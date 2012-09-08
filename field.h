@@ -26,7 +26,7 @@ int point_equals(point_t a, point_t b);
 
 class CField {
     private:
-        vector<shape_t> _shapes;
+        vector<shape_t *> _shapes;
         dimension_t _dimension;
     public:
         CField(dimension_t dimension);
@@ -35,9 +35,9 @@ class CField {
         
         int contains(point_t point);
         
-        void add(shape_t shape);
+        void add(shape_t *shape);
         
-        vector<shape_t> get_shapes();
+        vector<shape_t *> get_shapes();
 };
 
 #endif
