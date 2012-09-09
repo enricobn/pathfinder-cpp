@@ -108,7 +108,7 @@ static point_t *get_adjacents(point_t point) {
 }
 
 int find_node(vector<CPathNode *> nodes, CPathNode *node) {
-    for (int i = 0; i < nodes.size(); i++ ) {
+    for (unsigned int i = 0; i < nodes.size(); i++ ) {
         CPathNode *iNode = nodes[i];
         if (*iNode == *node) {
             return TRUE;
@@ -139,10 +139,9 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
         int min = INT_MAX;
         CPathNode *min_node = NULL;
         
-        int i = 0;
         vector<CPathNode*>::iterator it;
-        for (it = open.begin(); it != open.end(); it++ ) {
-            CPathNode *node = *it;
+        for (unsigned int i = 0; i < open.size(); i++ ) {
+            CPathNode *node = open[i];
 //            printf("iterating nodes ");
 //            node->print();
 
