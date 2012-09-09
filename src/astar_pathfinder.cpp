@@ -254,7 +254,6 @@ point_t *get_next_to_path(CField field, point_t from, point_t to) {
 
     point_t *point = NULL;   
     
-    int i = 0;
     while (target_node->get_parent() != NULL) {
 //        printf("cucu\n");
 //	    if (*target_node == *target_node.get_parent()) {

@@ -4,7 +4,7 @@ VPATH=src bin
 SAVE-TEMPS =
 CC = g++
 DEBUG = -g
-CFLAGS = -Wall -c $(DEBUG) -O2 -pedantic $(SAVE-TEMPS) 
+CFLAGS = -Wall -c $(DEBUG) -O2 -pedantic $(SAVE-TEMPS)
 LFLAGS = -Wall $(DEBUG) -o bin/$@
 GL = -lglut -lGLU
 
