@@ -1,5 +1,5 @@
 #include <assert.h>
-#include "field.hpp"
+#include "Field.hpp"
 
 int main(int argc, char** argv) {
     dimension_t dimension = {100, 100};

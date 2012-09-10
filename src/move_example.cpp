@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <GL/glut.h>
 #include "globals.hpp"
-#include "field.hpp"
+#include "Field.hpp"
 #include "astar_pathfinder.hpp"
 
 #define WIDTH 100
@@ -58,7 +58,7 @@ void green_draw(shape_t rectangle) {
 }
 
 void field_init() {
-    field = CField::CField({WIDTH, HEIGHT});
+    field = CField({WIDTH, HEIGHT});
 
     field.add(rectangle_new(10, 10, 10, 10, white_draw));
 

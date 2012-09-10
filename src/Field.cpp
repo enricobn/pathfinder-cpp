@@ -1,5 +1,5 @@
 #include "globals.hpp"
-#include "field.hpp"
+#include "Field.hpp"
 
 CField::CField(dimension_t dimension) {
     _dimension = dimension;
