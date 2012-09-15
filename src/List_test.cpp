@@ -2,12 +2,12 @@
 #include "globals.hpp"
 #include "List.hpp"
 
-int equals(const void *e1, const void *e2) {
-    return *((int *)e1) == *((int *)e2);
+int equals(int *e1, int *e2) {
+    return *e1 == *e2;
 }
 
 int main(int argc, char** argv) {
-    List *l = new List(equals);
+    List<int*> *l = new List<int*>(equals);
     assert(l->first == NULL);
     assert(l->last == NULL);
 
@@ -29,15 +29,15 @@ int main(int argc, char** argv) {
     assert(l->first->current == &a);
     assert(l->last->current == &c);
 
-    struct cursor *cur = l->first;
+    struct cursor<int*> *cur = l->first;
     
-	assert(*((int *)cur->current) == 10);
+	assert(*cur->current == 10);
 
     cur = cur->next;
-	assert(*((int *)cur->current) == 20);
+	assert(*cur->current == 20);
 	
     cur = cur->next;    
-    assert(*((int *)cur->current) == 30);
+    assert(*cur->current == 30);
 
     int count = 0;
     int *element;

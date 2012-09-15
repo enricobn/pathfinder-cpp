@@ -149,12 +149,12 @@ int find_node(vector<CPathNode *> nodes, CPathNode *node) {
 }
 */
 
-int CPathNode_equals(const void *e1, const void *e2) {
-	return point_equals(((CPathNode *)e1)->get_point(), ((CPathNode *)e2)->get_point());
+int CPathNode_equals(CPathNode *e1, CPathNode *e2) {
+	return point_equals(e1->get_point(), e2->get_point());
 }
 
-static List *open = NULL;
-static List *closed = NULL;
+static List<CPathNode*> *open = NULL;
+static List<CPathNode*> *closed = NULL;
 
 FILE *file = NULL;
 
@@ -171,8 +171,8 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
 	#endif
 //    open.reserve(10000);
 //    closed.reserve(10000);
-    open = new List(CPathNode_equals);
-    closed = new List(CPathNode_equals);
+    open = new List<CPathNode*>(CPathNode_equals);
+    closed = new List<CPathNode*>(CPathNode_equals);
     
     CPathNode *from_node = new CPathNode(NULL, from, to);
     if (from_node == NULL) {
