@@ -27,7 +27,7 @@ class CPathNode {
         CPathNode(CPathNode *parent, point_t point, point_t to);
         CPathNode *get_parent();
         void set_parent(CPathNode *parent);
-        point_t get_point();
+        point_t& get_point();
         int get_F();
         int get_G();
         int G_vs(CPathNode *vs);
@@ -52,15 +52,12 @@ void CPathNode::set_parent(CPathNode *parent) {
 }
 
 void CPathNode::print() {
-    //printf("this = %p parent = %p (%d, %d) = %d)\n", this, _parent, _point.x, _point.y, _F);
 	printf("(%d,%d)=%d\n", _point.x, _point.y, _F);
 }
 
 void CPathNode::fprint(FILE *file) {
-    //printf("this = %p parent = %p (%d, %d) = %d)\n", this, _parent, _point.x, _point.y, _F);
 	fprintf(file, "(%d,%d)=%d\n", _point.x, _point.y, _F);
 }
-
 
 int CPathNode::G_vs(CPathNode *vs) {
     if (vs == NULL) {
@@ -91,7 +88,7 @@ int CPathNode::get_G() {
     return _G;
 }
 
-point_t CPathNode::get_point() {
+point_t& CPathNode::get_point() {
     return _point;
 }
 
