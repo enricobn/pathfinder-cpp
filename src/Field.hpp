@@ -41,7 +41,7 @@ class CField {
         
         void add(shape_t *shape);
         
-        vector<shape_t *> get_shapes();
+        vector<shape_t *> *get_shapes();
 };
 
 #endif

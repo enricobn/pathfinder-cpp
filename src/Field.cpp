@@ -19,16 +19,16 @@ int CField::is_occupied(point_t point) {
 
 int CField::contains(point_t point) {
     return (point.x >= 0 && point.y >= 0
-        && point.x <= _dimension.width 
-        && point.y <= _dimension.height);
+        && point.x < _dimension.width
+        && point.y < _dimension.height);
 }
 
 void CField::add(shape_t *shape) {
     _shapes.push_back(shape);
 }
 
-vector<shape_t *> CField::get_shapes() {
-    return _shapes;
+vector<shape_t *> *CField::get_shapes() {
+    return &_shapes;
 }
 
 int point_equals(point_t a, point_t b) {
