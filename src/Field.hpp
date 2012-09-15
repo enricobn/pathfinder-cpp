@@ -26,7 +26,7 @@ struct shape_s {
 
 typedef struct shape_s shape_t;
 
-int point_equals(point_t a, point_t b);
+int point_equals(const point_t& a, const point_t& b);
 
 class CField {
     private:
@@ -35,9 +35,9 @@ class CField {
     public:
         CField(dimension_t dimension);
         
-        int is_occupied(point_t point);
+        int is_occupied(point_t& point);
         
-        int contains(point_t point);
+        int contains(point_t& point);
         
         void add(shape_t *shape);
         

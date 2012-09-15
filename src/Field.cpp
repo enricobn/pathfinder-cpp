@@ -5,7 +5,7 @@ CField::CField(dimension_t dimension) {
     _dimension = dimension;
 }
 
-int CField::is_occupied(point_t point) {
+int CField::is_occupied(point_t& point) {
     for (unsigned int i =0; i < _shapes.size(); i++) {
         shape_t *element = _shapes[i];
         if (point.x >= element->point.x && point.y >= element->point.y
@@ -17,7 +17,7 @@ int CField::is_occupied(point_t point) {
     return FALSE;
 }
 
-int CField::contains(point_t point) {
+int CField::contains(point_t& point) {
     return (point.x >= 0 && point.y >= 0
         && point.x < _dimension.width
         && point.y < _dimension.height);
@@ -31,7 +31,7 @@ vector<shape_t *> *CField::get_shapes() {
     return &_shapes;
 }
 
-int point_equals(point_t a, point_t b) {
+int point_equals(const point_t& a, const point_t& b) {
     return a.x == b.x && a.y == b.y;
 }
 

@@ -24,19 +24,19 @@ class CPathNode {
         int _G;
         int _H;
     public :
-        CPathNode(CPathNode *parent, point_t point, point_t to);
+        CPathNode(CPathNode *parent, point_t& point, point_t& to);
         CPathNode *get_parent();
         void set_parent(CPathNode *parent);
         point_t& get_point();
         int get_F();
         int get_G();
-        int G_vs(CPathNode *vs);
+        int G_vs(const CPathNode *vs);
         bool operator ==(const CPathNode& other);
         void print();
         void fprint(FILE *file);
 };
 
-CPathNode::CPathNode(CPathNode *parent, point_t point, point_t to) {
+CPathNode::CPathNode(CPathNode *parent, point_t& point, point_t& to) {
     _parent = parent;
     _point = point;
     _to = to;
@@ -59,7 +59,7 @@ void CPathNode::fprint(FILE *file) {
 	fprintf(file, "(%d,%d)=%d\n", _point.x, _point.y, _F);
 }
 
-int CPathNode::G_vs(CPathNode *vs) {
+int CPathNode::G_vs(const CPathNode *vs) {
     if (vs == NULL) {
         return 0;
     }
