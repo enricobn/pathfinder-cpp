@@ -147,24 +147,11 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
         
         CPathNode *node = NULL;
         LIST_FOREACH_START(open, node)
-//            printf("iterating nodes ");
-//            node->print();
-
-       	    if (node == node->get_parent()) {
-                printf("node == node.parent!!!\n");
-//                printf("node %d = %d, %d\n", &node, node.point.x, node.point.y);
-//                printf("node parent %d = %d, %d\n", node.parent, node.parent->point.x, node.parent->point.y);
-//                exit(1);
-            }
-
-//                printf("point=%d,%d=%d\n", node.point.x, node.point.y, node.F);
             if (min_node == NULL || node->get_F() < min) {
                 min = node->get_F();
                 min_node = node;
             }
         LIST_FOREACH_END(open)
-        
-//        printf("min_node = %p\n", min_node);
         
         if (point_equals(min_node->get_point(), to)) {
             target_node = (CPathNode *)malloc(sizeof(CPathNode));
@@ -183,25 +170,10 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
                 if (node == NULL) {
                     ERROR("Error allocating new node");
                 }
-//                printf("node created: ");
-//               (*node).print(); 
-/*
-          	    if (&node == &node->parent) {
-                    printf("created: are equals!!!\n");
-                }
-*/
-//                vector<CPathNode*>::iterator iClosed = std::find(closed.begin(), closed.end(), node);
                 if (!closed->contains(node)) {
-//                    vector<CPathNode*>::iterator iOpen = std::find(open.begin(), open.end(), node);
                     if (!open->contains(node)) {
-//                        printf("not found\n");
                         open->add(node);
-//                        printf("pushed %d\n", node);
-//	               	    if (node == node.get_parent()) {
-//                            printf("added: are equals!!!\n");
-//                        }
                     } else {
-//                        printf("found\n");
 /* TODO
                         int g_to_min = path_node_G_vs(min_node, node);
                         if (g_to_min < node->G) {
@@ -216,22 +188,12 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
                 } else {
                     free(node);
                 }
-//                free(node);
-/*
-            } else {
-                printf("Excluded %d, %d, fc=%d, oc=%d\n", point.x, point.y, field_contains(field, point), field_is_occupied(field, point));
-*/
             }
         }
 
-//        printf("open before %d\n", open.size());
         open->remove(min_node);
-//        printf("open after %d\n", open.size());
         closed->add(min_node);
     }
-
-//    printf("found %d, %d\n", target_node->point.x, target_node->point.y);     
-    
     return target_node;
 }
 
@@ -261,16 +223,12 @@ point_t *get_next_to_path(CField field, point_t from, point_t to) {
     point_t *point = NULL;   
     
     while (target_node->get_parent() != NULL) {
-//        printf("cucu\n");
-//	    if (*target_node == *target_node.get_parent()) {
-//            printf("are equals!!!\n");
-//        } else {
-//            printf("target_node %d, %d, %d\n", target_node, target_node->point.x, target_node->point.y);
-//            printf("target_node parent %d, %d, %d\n", target_node->parent, target_node->parent->point.x, target_node->parent->point.y);
-//        }
         /* the path can contains occupied points. Tipically it can be only the end point */ 
         if (!field.is_occupied(target_node->get_point())) {
-            point = &target_node->get_point(); 
+        	// I cannot do: point = &target_node->get_point();
+        	// since it's an address of a temporary, the I get a warning
+        	point_t node_point = target_node->get_point();
+            point = &node_point;
         }
         target_node = target_node->get_parent();
     }
