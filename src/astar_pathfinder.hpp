@@ -3,6 +3,6 @@
 
 #include "Field.hpp"
 
-point_t *get_next_to_path(CField field, point_t from, point_t to);
+point_t *get_next_to_path(CField& field, point_t from, point_t to);
 
 #endif

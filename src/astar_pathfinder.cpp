@@ -5,42 +5,62 @@
 #include <string.h>
 #include <limits.h>
 #include <algorithm>
-#include <vector>
+//#include <vector>
 #include "globals.hpp"
 #include "astar_pathfinder.hpp"
 #include "Field.hpp"
 #include "List.hpp"
 
 #define null 0
+//#define PRINT
+//#define FPRINT
 
 class CPathNode {
     private :
         CPathNode *_parent;
         point_t _point;
+        point_t _to;
         int _F;
         int _G;
         int _H;
-        int G_vs(CPathNode *vs);
     public :
         CPathNode(CPathNode *parent, point_t point, point_t to);
         CPathNode *get_parent();
+        void set_parent(CPathNode *parent);
         point_t get_point();
         int get_F();
-        bool operator ==(const CPathNode other);
+        int get_G();
+        int G_vs(CPathNode *vs);
+        bool operator ==(const CPathNode& other);
         void print();
+        void fprint(FILE *file);
 };
 
 CPathNode::CPathNode(CPathNode *parent, point_t point, point_t to) {
     _parent = parent;
     _point = point;
+    _to = to;
     _H = (abs(to.x - point.x) + abs(to.y - point.y)) * 10;    
     _G = G_vs(parent);
     _F = _H + _G;
 }
 
-void CPathNode::print() {
-    printf("this = %p parent = %p (%d, %d) = %d)\n", this, _parent, _point.x, _point.y, _F); 
+void CPathNode::set_parent(CPathNode *parent) {
+    _H = (abs(_to.x - _point.x) + abs(_to.y - _point.y)) * 10;
+    _G = G_vs(parent);
+    _F = _H + _G;
 }
+
+void CPathNode::print() {
+    //printf("this = %p parent = %p (%d, %d) = %d)\n", this, _parent, _point.x, _point.y, _F);
+	printf("(%d,%d)=%d\n", _point.x, _point.y, _F);
+}
+
+void CPathNode::fprint(FILE *file) {
+    //printf("this = %p parent = %p (%d, %d) = %d)\n", this, _parent, _point.x, _point.y, _F);
+	fprintf(file, "(%d,%d)=%d\n", _point.x, _point.y, _F);
+}
+
 
 int CPathNode::G_vs(CPathNode *vs) {
     if (vs == NULL) {
@@ -55,7 +75,7 @@ int CPathNode::G_vs(CPathNode *vs) {
     return g;
 }
 
-bool CPathNode::operator ==(const CPathNode other) {
+bool CPathNode::operator ==(const CPathNode& other) {
     return point_equals(_point, other._point);
 }
 
@@ -67,11 +87,23 @@ int CPathNode::get_F() {
     return _F;
 }
 
+int CPathNode::get_G() {
+    return _G;
+}
+
 point_t CPathNode::get_point() {
     return _point;
 }
 
 static point_t *adjacents_tmp = NULL;
+
+void fprint_point(FILE *file, point_t point) {
+	fprintf(file, "(%d,%d)\n", point.x, point.y);
+}
+
+void print_point(point_t point) {
+	printf("(%d,%d)\n", point.x, point.y);
+}
 
 static point_t *get_adjacents(point_t point) {
     if (adjacents_tmp == NULL) {
@@ -108,6 +140,7 @@ static point_t *get_adjacents(point_t point) {
     return adjacents_tmp;
 }
 
+/*
 int find_node(vector<CPathNode *> nodes, CPathNode *node) {
     for (unsigned int i = 0; i < nodes.size(); i++ ) {
         CPathNode *iNode = nodes[i];
@@ -117,6 +150,7 @@ int find_node(vector<CPathNode *> nodes, CPathNode *node) {
     }
     return FALSE;
 }
+*/
 
 int CPathNode_equals(const void *e1, const void *e2) {
 	return point_equals(((CPathNode *)e1)->get_point(), ((CPathNode *)e2)->get_point());
@@ -125,19 +159,39 @@ int CPathNode_equals(const void *e1, const void *e2) {
 static List *open = NULL;
 static List *closed = NULL;
 
-CPathNode *get_path_internal(CField field, point_t from, point_t to) {
+FILE *file = NULL;
+
+CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
+	int debug1 = from.x == 61 && from.y == 73 && to.x == 0 && to.y == 1;
+	#ifdef FPRINT
+		if (file == NULL) {
+			file = fopen("out.txt","w");
+		}
+		fprintf(file, "from");
+		fprint_point(file, from);
+		fprintf(file, "to");
+		fprint_point(file, to);
+	#endif
 //    open.reserve(10000);
 //    closed.reserve(10000);
     open = new List(CPathNode_equals);
     closed = new List(CPathNode_equals);
     
-    CPathNode *from_node = new CPathNode(NULL, from, to); 
+    CPathNode *from_node = new CPathNode(NULL, from, to);
+    if (from_node == NULL) {
+    	ERROR("Cannot create new CPathNode");
+    }
     open->add(from_node);
 
     CPathNode *target_node = NULL;
 
     while (TRUE) {
-//        printf("%u \n", open.size());
+		#ifdef FPRINT
+        	fprintf(file, "%u ", open->size());
+		#endif
+//        if (debug1) {
+//        	printf("%u\n", open->size());
+//        }
         if (open->size() == 0) {
             return NULL;
         }
@@ -153,9 +207,20 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
             }
         LIST_FOREACH_END(open)
         
+		#ifdef FPRINT
+        	min_node->fprint(file);
+		#endif
+
+        int debug = debug1 && min_node->get_point().x == 61
+        		&& min_node->get_point().y == 72;
+
+        if (min_node->get_point().x == 60 && min_node->get_point().y == 74) {
+        	printf(" ");
+        }
         if (point_equals(min_node->get_point(), to)) {
-            target_node = (CPathNode *)malloc(sizeof(CPathNode));
-            memcpy(target_node, min_node, sizeof(CPathNode));
+//            target_node = (CPathNode *)malloc(sizeof(CPathNode));
+//            memcpy(target_node, min_node, sizeof(CPathNode));
+        	target_node = min_node;
             break;
         }
 
@@ -163,6 +228,12 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
 
         for (int i = 0; i < 8; i++) {
             point_t point = adjacents[i];
+			#ifdef FPRINT
+//            	fprint_point(file, point);
+			#endif
+            if (debug) {
+            	print_point(point);
+            }
 /*            printf("adjacent=%d,%d\n", point.x, point.y);*/
             // I do not consider the end point to be occupied, so I can move towards it
             if (field.contains(point) && (point_equals(point, to) || !field.is_occupied(point))) {
@@ -171,32 +242,52 @@ CPathNode *get_path_internal(CField field, point_t from, point_t to) {
                     ERROR("Error allocating new node");
                 }
                 if (!closed->contains(node)) {
+                	if (debug) {
+                		printf("!closed\n");
+                	}
                     if (!open->contains(node)) {
+                    	if (debug) {
+                    		printf("!open %d\n", open->size());
+                    	}
                         open->add(node);
+                    	if (debug) {
+                    		printf("!open %d\n", open->size());
+                    	}
                     } else {
-/* TODO
-                        int g_to_min = path_node_G_vs(min_node, node);
-                        if (g_to_min < node->G) {
+                    	if (debug) {
+                    		printf("open\n");
+                    	}
+                        int g_to_min = node->G_vs(min_node);
+                        if (g_to_min < node->get_G()) {
                             printf("optimized path\n");
-                            node->parent = min_node;
-                            node->G = path_node_G(node);
-                            node->F = path_node_F(node);
+                            node->set_parent(min_node);
+                            open->remove(node);
+                            open->add(node);
                         }
-*/
-                        free(node);
                     }
                 } else {
-                    free(node);
+                	if (debug) {
+                		printf("closed\n");
+                	}
+                    delete node;
                 }
             }
         }
 
         open->remove(min_node);
+        if (debug) {
+        	if (open->contains(min_node)) {
+            	printf("contains\n");
+        	} else {
+        		printf("!contains\n");
+        	}
+        }
         closed->add(min_node);
     }
     return target_node;
 }
 
+/*
 void clear(vector<CPathNode*> nodes) {
     vector<CPathNode*>::iterator it;
     for (it = nodes.begin(); it != nodes.end(); it++ ) {
@@ -209,24 +300,27 @@ void clear(vector<CPathNode*> nodes) {
     }
     nodes.clear(); 
 }
+*/
 
-point_t *get_next_to_path(CField field, point_t from, point_t to) {
+point_t *get_next_to_path(CField& field, point_t from, point_t to) {
     CPathNode *target_node = get_path_internal(field, from, to);
     if (target_node == NULL) {
         open->clear(TRUE);
-        free(open);
+        delete open;
+
         closed->clear(TRUE);
-        free(closed);
+        delete closed;
+
         return NULL;
     }
 
     point_t *point = NULL;   
     
-    while (target_node->get_parent() != NULL) {
+    while (target_node != NULL) {
         /* the path can contains occupied points. Tipically it can be only the end point */ 
         if (!field.is_occupied(target_node->get_point())) {
         	// I cannot do: point = &target_node->get_point();
-        	// since it's an address of a temporary, the I get a warning
+        	// since it's an address of a temporary, then I get a warning
         	point_t node_point = target_node->get_point();
             point = &node_point;
         }
@@ -238,11 +332,16 @@ point_t *get_next_to_path(CField field, point_t from, point_t to) {
     if (point != NULL) {
         result = (point_t *)malloc(sizeof(point_t));
         memcpy(result, point, sizeof(point_t));
+		#ifdef PRINT
+        	printf("(%d,%d)\n", result->x, result->y);
+		#endif
     }
     
     open->clear(TRUE);
-    free(open);
+    delete open;
+
     closed->clear(TRUE);
-    free(closed);
+    delete closed;
+
     return result;
 }
