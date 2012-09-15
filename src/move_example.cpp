@@ -78,7 +78,7 @@ void field_init() {
         moving_shapes[2 * i].end.y = 99 -i;
         field.add(p1);
 
-        shape_t *p2 = rectangle_new(99, 99 -i, 1, 1, blue_draw);
+        shape_t *p2 = rectangle_new(90, 99 -i, 1, 1, blue_draw);
         moving_shapes[2 * i +1].shape = p2;
         moving_shapes[2 * i + 1].end.x = 0;
         moving_shapes[2 * i + 1].end.y = moving_shapes_count -i;
@@ -92,8 +92,10 @@ void display(void)
 /* clear all pixels  */
     glClear (GL_COLOR_BUFFER_BIT);
 
-    for (unsigned int i = 0; i < field.get_shapes().size(); i++) {
-        shape_t *s = field.get_shapes()[i];
+    vector<shape_t *> *shapes = field.get_shapes();
+
+    for (unsigned int i = 0; i < shapes->size(); i++) {
+        shape_t *s = (*shapes)[i];
         glColor3f (1.0, 1.0, 1.0);
         s->draw(*s);
     }
