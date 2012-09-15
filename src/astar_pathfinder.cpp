@@ -261,8 +261,11 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
                         if (g_to_min < node->get_G()) {
                             printf("optimized path\n");
                             node->set_parent(min_node);
+                            // TODO I must free the removed element
                             open->remove(node);
                             open->add(node);
+                        } else {
+                        	delete node;
                         }
                     }
                 } else {

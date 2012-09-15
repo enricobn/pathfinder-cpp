@@ -14,6 +14,10 @@ List::List(list_equals equals) {
     last = NULL;
 }
 
+List::~List() {
+	free(actual_cursor);
+}
+
 void List::add(void *element) {
     struct cursor *c = NEW_POINTER(struct cursor);
     if (c == NULL) {
@@ -47,7 +51,7 @@ void List::clear(int deep) {
     last = NULL;
     while (cur != NULL) {
         if (deep && cur->current != NULL) {
-            free(cur->current);
+            delete cur->current;
         }
         struct cursor *tmp = cur;
         cur = cur->next;

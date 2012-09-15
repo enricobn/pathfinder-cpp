@@ -140,6 +140,7 @@ void animate() {
         
         moving_shapes[i].shape->point.x = point->x;
         moving_shapes[i].shape->point.y = point->y;
+        free(point);
     }
 
 

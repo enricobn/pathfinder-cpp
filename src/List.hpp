@@ -22,6 +22,7 @@ public:
     list_equals equals;
 
     List(list_equals equals);
+    ~List();
     void add(void *element);
     int contains(const void *element);
     void clear(int deep);
