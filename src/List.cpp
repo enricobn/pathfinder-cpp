@@ -60,16 +60,23 @@ int List::remove(void *element) {
     struct cursor *prev = first;
     for (cur = first; cur != NULL; cur = cur->next) {
         if (equals(element, cur->current)) {
+        	int is_last = (cur == last);
             if (cur == first) {
                 struct cursor *tmp = first;
                 first = first->next;
                 free(tmp);
                 tmp = NULL;
+                if (is_last) {
+                	last = first;
+                }
             } else {
                 struct cursor *tmp = cur;
                 prev->next = cur->next;
                 free(tmp);
                 tmp = NULL;
+                if (is_last) {
+                	last = prev;
+                }
             }
             return TRUE;
         }
@@ -80,9 +87,10 @@ int List::remove(void *element) {
 
 int List::size() {
     int count = 0;
-    void *element;
-    LIST_FOREACH_START(this, element)
-        count++;
-    LIST_FOREACH_END(this)
+    struct cursor *cur = NULL;
+    for (cur = first; cur != NULL; cur = cur->next) {
+    	count++;
+    }
+
     return count;
 }
