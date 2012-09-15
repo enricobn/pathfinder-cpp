@@ -12,7 +12,7 @@ GL = -lglut -lGLU
 
 all : configure field_test.bin move_example.bin container_test.bin List_test.bin
 
-List_test.bin : obj/List_test.o obj/List.o
+List_test.bin : obj/List_test.o
 	@echo 'Building $@'
 	$(CC) $(LFLAGS) $^
 
@@ -20,7 +20,7 @@ container_test.bin : obj/container_test.o
 	@echo 'Building $@'
 	$(CC) $(LFLAGS) $^
 
-move_example.bin : obj/move_example.o obj/astar_pathfinder.o obj/Field.o obj/List.o
+move_example.bin : obj/move_example.o obj/astar_pathfinder.o obj/Field.o 
 	@echo 'Building $@'
 	$(CC) $(LFLAGS) $(GL) $^
 
