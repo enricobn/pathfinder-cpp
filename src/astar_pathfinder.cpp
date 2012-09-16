@@ -208,12 +208,6 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
         	min_node->fprint(file);
 		#endif
 
-        int debug = debug1 && min_node->get_point().x == 61
-        		&& min_node->get_point().y == 72;
-
-        if (min_node->get_point().x == 60 && min_node->get_point().y == 74) {
-        	printf(" ");
-        }
         if (point_equals(min_node->get_point(), to)) {
 //            target_node = (CPathNode *)malloc(sizeof(CPathNode));
 //            memcpy(target_node, min_node, sizeof(CPathNode));
@@ -228,9 +222,6 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
 			#ifdef FPRINT
 //            	fprint_point(file, point);
 			#endif
-            if (debug) {
-            	print_point(point);
-            }
 /*            printf("adjacent=%d,%d\n", point.x, point.y);*/
             // I do not consider the end point to be occupied, so I can move towards it
             if (field.contains(point) && (point_equals(point, to) || !field.is_occupied(point))) {
@@ -239,21 +230,9 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
                     ERROR("Error allocating new node");
                 }
                 if (!closed->contains(node)) {
-                	if (debug) {
-                		printf("!closed\n");
-                	}
                     if (!open->contains(node)) {
-                    	if (debug) {
-                    		printf("!open %d\n", open->size());
-                    	}
                         open->add(node);
-                    	if (debug) {
-                    		printf("!open %d\n", open->size());
-                    	}
                     } else {
-                    	if (debug) {
-                    		printf("open\n");
-                    	}
                         int g_to_min = node->G_vs(min_node);
                         if (g_to_min < node->get_G()) {
                             printf("optimized path\n");
@@ -266,22 +245,12 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
                         }
                     }
                 } else {
-                	if (debug) {
-                		printf("closed\n");
-                	}
                     delete node;
                 }
             }
         }
 
         open->remove(min_node);
-        if (debug) {
-        	if (open->contains(min_node)) {
-            	printf("contains\n");
-        	} else {
-        		printf("!contains\n");
-        	}
-        }
         closed->add(min_node);
     }
     return target_node;
