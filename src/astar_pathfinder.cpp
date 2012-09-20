@@ -5,7 +5,7 @@
 #include <string.h>
 #include <limits.h>
 #include <algorithm>
-//#include <vector>
+#include <map>
 #include "globals.hpp"
 #include "astar_pathfinder.hpp"
 #include "Field.hpp"
@@ -99,7 +99,7 @@ void fprint_point(FILE *file, point_t point) {
 }
 
 void print_point(point_t point) {
-	printf("(%d,%d)\n", point.x, point.y);
+	printf("(%d,%d)", point.x, point.y);
 }
 
 static point_t *get_adjacents(point_t point) {
@@ -153,12 +153,19 @@ int CPathNode_equals(CPathNode *e1, CPathNode *e2) {
 	return point_equals(e1->get_point(), e2->get_point());
 }
 
-static List<CPathNode*> *open = NULL;
-static List<CPathNode*> *closed = NULL;
+static map<point_t, CPathNode*> *open = NULL;
+static map<point_t, CPathNode*> *closed = NULL;
 
 FILE *file = NULL;
 
 CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
+	#ifdef PRINT
+		printf("get_path_internal ");
+		print_point(from);
+		printf(" ");
+		print_point(to);
+		printf("\n");
+	#endif
 	int debug1 = from.x == 61 && from.y == 73 && to.x == 0 && to.y == 1;
 	#ifdef FPRINT
 		if (file == NULL) {
@@ -171,14 +178,14 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
 	#endif
 //    open.reserve(10000);
 //    closed.reserve(10000);
-    open = new List<CPathNode*>(CPathNode_equals);
-    closed = new List<CPathNode*>(CPathNode_equals);
+    open = new map<point_t, CPathNode *>();
+    closed = new map<point_t, CPathNode *>();
     
     CPathNode *from_node = new CPathNode(NULL, from, to);
     if (from_node == NULL) {
     	ERROR("Cannot create new CPathNode");
     }
-    open->add(from_node);
+    open->insert(pair<point_t,CPathNode *>(from, from_node));
 
     CPathNode *target_node = NULL;
 
@@ -195,14 +202,13 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
         int min = INT_MAX;
         CPathNode *min_node = NULL;
 
-        
-        CPathNode *node = NULL;
-        LIST_FOREACH_START(open, node)
+        for( map<point_t,CPathNode *>::iterator ii=open->begin(); ii!= open->end(); ++ii) {
+        	CPathNode *node = (*ii).second;
             if (min_node == NULL || node->get_F() < min) {
                 min = node->get_F();
                 min_node = node;
             }
-        LIST_FOREACH_END(open)
+        }
         
 		#ifdef FPRINT
         	min_node->fprint(file);
@@ -222,36 +228,44 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
 			#ifdef FPRINT
 //            	fprint_point(file, point);
 			#endif
-/*            printf("adjacent=%d,%d\n", point.x, point.y);*/
+			#ifdef PRINT
+            	printf("adjacent");
+            	print_point(point);
+            	printf("\n");
+			#endif
             // I do not consider the end point to be occupied, so I can move towards it
             if (field.contains(point) && (point_equals(point, to) || !field.is_occupied(point))) {
-                CPathNode *node = new CPathNode(min_node, point, to);
-                if (node == NULL) {
-                    ERROR("Error allocating new node");
-                }
-                if (!closed->contains(node)) {
-                    if (!open->contains(node)) {
-                        open->add(node);
-                    } else {
-                        int g_to_min = node->G_vs(min_node);
-                        if (g_to_min < node->get_G()) {
-                            printf("optimized path\n");
-                            node->set_parent(min_node);
-                            // TODO I must free the removed element
-                            open->remove(node);
-                            open->add(node);
-                        } else {
-                        	delete node;
-                        }
+                map<point_t,CPathNode *>::iterator iClosed = closed->find(point);
+                if (iClosed == closed->end()) {
+                    CPathNode *node = new CPathNode(min_node, point, to);
+                    if (node == NULL) {
+                        ERROR("Error allocating new node");
                     }
-                } else {
-                    delete node;
+                	map<point_t,CPathNode *>::iterator iOpen = open->find(point);
+                    if (iOpen == open->end()) {
+                    	open->insert(pair<point_t,CPathNode *>(point, node));
+                    } else {
+						#ifdef PRINT
+                    		printf("Found (%d,%d)\n", iOpen->first.x, iOpen->first.y);
+						#endif
+//                        int g_to_min = node->G_vs(min_node);
+//                        if (g_to_min < node->get_G()) {
+//                            printf("optimized path\n");
+//                            node->set_parent(min_node);
+//                            // TODO I must free the removed element
+//                            open->remove(node);
+//                            open->add(node);
+//                        } else {
+//                        	delete node;
+//                        }
+                    	delete node;
+                    }
                 }
             }
         }
 
-        open->remove(min_node);
-        closed->add(min_node);
+        open->erase(min_node->get_point());
+        closed->insert(pair<point_t,CPathNode *>(min_node->get_point(), min_node));
     }
     return target_node;
 }
@@ -271,15 +285,19 @@ void clear(vector<CPathNode*> nodes) {
 }
 */
 
+void clear(map<point_t, CPathNode *> *m) {
+	for( map<point_t,CPathNode *>::iterator ii=m->begin(); ii!= m->end(); ++ii) {
+//		delete &((*ii).first);
+		delete (*ii).second;
+	}
+	delete m;
+}
+
 point_t *get_next_to_path(CField& field, point_t from, point_t to) {
     CPathNode *target_node = get_path_internal(field, from, to);
     if (target_node == NULL) {
-        open->clear(TRUE);
-        delete open;
-
-        closed->clear(TRUE);
-        delete closed;
-
+        clear(open);
+        clear(closed);
         return NULL;
     }
 
@@ -306,11 +324,8 @@ point_t *get_next_to_path(CField& field, point_t from, point_t to) {
 		#endif
     }
     
-    open->clear(TRUE);
-    delete open;
-
-    closed->clear(TRUE);
-    delete closed;
+    clear(open);
+    clear(closed);
 
     return result;
 }

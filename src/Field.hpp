@@ -5,10 +5,20 @@ using namespace std;
 #ifndef FIELD_H_
 #define FIELD_H_
 
-typedef struct {
+struct point_t_s {
     int x;
     int y;
-} point_t;
+    inline
+    bool operator<(const point_t_s &other) const {
+    	if (x == other.x) {
+    		return y < other.y;
+    	} else {
+    		return x < other.x;
+    	}
+    }
+};
+
+typedef struct point_t_s point_t;
 
 typedef struct {
     int width;
