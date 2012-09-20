@@ -16,6 +16,9 @@ struct point_t_s {
     		return x < other.x;
     	}
     }
+    void print() {
+        printf("(%d, %d)", x, y);
+    }
 };
 
 typedef struct point_t_s point_t;
@@ -23,6 +26,9 @@ typedef struct point_t_s point_t;
 typedef struct {
     int width;
     int height;
+    void print() {
+        printf("(%d, %d)", width, height);
+    }
 } dimension_t;
 
 struct shape_s {
@@ -30,7 +36,10 @@ struct shape_s {
     dimension_t dimension;
     void (*draw)(struct shape_s shape);
     void print() {
-        printf("shape(%d, %d)\n", point.x, point.y); 
+        printf("shape p");
+        point.print();
+        printf(" d");
+        dimension.print();
     };
 };
 

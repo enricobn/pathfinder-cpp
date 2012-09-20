@@ -248,16 +248,12 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
 						#ifdef PRINT
                     		printf("Found (%d,%d)\n", iOpen->first.x, iOpen->first.y);
 						#endif
-//                        int g_to_min = node->G_vs(min_node);
-//                        if (g_to_min < node->get_G()) {
-//                            printf("optimized path\n");
-//                            node->set_parent(min_node);
-//                            // TODO I must free the removed element
-//                            open->remove(node);
-//                            open->add(node);
-//                        } else {
-//                        	delete node;
-//                        }
+                    	CPathNode *got = iOpen->second;
+
+						int gToMin = min_node->G_vs(got);
+						if (gToMin < node->get_G()) {
+							got->set_parent(min_node);
+						}
                     	delete node;
                     }
                 }
