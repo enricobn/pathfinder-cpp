@@ -8,14 +8,19 @@ using namespace std;
 struct point_t_s {
     int x;
     int y;
-    inline
-    bool operator<(const point_t_s &other) const {
+
+    inline bool operator<(const point_t_s &other) const {
     	if (x == other.x) {
     		return y < other.y;
     	} else {
     		return x < other.x;
     	}
     }
+
+    bool operator==(const point_t_s &other) const {
+    	return x == other.x && y == other.y;
+    }
+
     void print() {
         printf("(%d, %d)", x, y);
     }
@@ -31,10 +36,12 @@ typedef struct {
     }
 } dimension_t;
 
-struct shape_s {
+struct shape_t;
+
+struct shape_t {
     point_t point;
     dimension_t dimension;
-    void (*draw)(struct shape_s shape);
+    void (*draw)(struct shape_t shape);
     void print() {
         printf("shape p");
         point.print();
@@ -42,10 +49,6 @@ struct shape_s {
         dimension.print();
     };
 };
-
-typedef struct shape_s shape_t;
-
-int point_equals(const point_t& a, const point_t& b);
 
 class CField {
     private:

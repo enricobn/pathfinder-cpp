@@ -126,7 +126,7 @@ void animate() {
     for (int i = 0; i < moving_shapes_count * 2; i++) {
 //        printf("moving_shape %d ", i);
 //        moving_shapes[i].shape->print();
-        if (point_equals(moving_shapes[i].shape->point, moving_shapes[i].end)) {
+        if (moving_shapes[i].shape->point == moving_shapes[i].end) {
             continue;
         }
         point_t *point = get_next_to_path(field, moving_shapes[i].shape->point, moving_shapes[i].end);

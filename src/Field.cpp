@@ -30,8 +30,3 @@ void CField::add(shape_t *shape) {
 vector<shape_t *> *CField::get_shapes() {
     return &_shapes;
 }
-
-int point_equals(const point_t& a, const point_t& b) {
-    return a.x == b.x && a.y == b.y;
-}
-

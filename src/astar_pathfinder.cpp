@@ -73,7 +73,7 @@ int CPathNode::G_vs(const CPathNode *vs) {
 }
 
 bool CPathNode::operator ==(const CPathNode& other) {
-    return point_equals(_point, other._point);
+    return _point == other._point;
 }
 
 CPathNode *CPathNode::get_parent() {
@@ -150,7 +150,7 @@ int find_node(vector<CPathNode *> nodes, CPathNode *node) {
 */
 
 int CPathNode_equals(CPathNode *e1, CPathNode *e2) {
-	return point_equals(e1->get_point(), e2->get_point());
+	return e1->get_point() == e2->get_point();
 }
 
 static map<point_t, CPathNode*> *open = NULL;
@@ -214,7 +214,7 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
         	min_node->fprint(file);
 		#endif
 
-        if (point_equals(min_node->get_point(), to)) {
+        if (min_node->get_point() == to) {
 //            target_node = (CPathNode *)malloc(sizeof(CPathNode));
 //            memcpy(target_node, min_node, sizeof(CPathNode));
         	target_node = min_node;
@@ -234,7 +234,7 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
             	printf("\n");
 			#endif
             // I do not consider the end point to be occupied, so I can move towards it
-            if (field.contains(point) && (point_equals(point, to) || !field.is_occupied(point))) {
+            if (field.contains(point) && (point == to || !field.is_occupied(point))) {
                 map<point_t,CPathNode *>::iterator iClosed = closed->find(point);
                 if (iClosed == closed->end()) {
                     CPathNode *node = new CPathNode(min_node, point, to);
@@ -300,7 +300,7 @@ point_t *get_next_to_path(CField& field, point_t from, point_t to) {
     point_t *point = NULL;   
     
     while (target_node != NULL) {
-        /* the path can contains occupied points. Tipically it can be only the end point */ 
+        /* the path can contains occupied points. Typically it can be only the end point */
         if (!field.is_occupied(target_node->get_point())) {
         	// I cannot do: point = &target_node->get_point();
         	// since it's an address of a temporary, then I get a warning
