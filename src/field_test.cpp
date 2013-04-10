@@ -2,7 +2,7 @@
 #include "Field.hpp"
 
 int main(int argc, char** argv) {
-    dimension_t dimension = {100, 100};
+    dimension_t dimension = dimension_t(100, 100);
     CField field = CField::CField(dimension);
 
     /* test contains */ 

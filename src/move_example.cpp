@@ -8,10 +8,15 @@
 #include "Field.hpp"
 #include "astar_pathfinder.hpp"
 
-#define WIDTH 100
-#define HEIGHT 100
+const int WIDTH = 100;
+const int HEIGHT = 100;
+static const int moving_shapes_count = 50;
 
-void rectangle_draw(shape_t rectangle) {
+dimension_t dimension = dimension_t(WIDTH, HEIGHT);
+
+CField field(dimension);
+
+void rectangle_draw(const shape_t& rectangle) {
     glRectf((float)rectangle.point.x, (float)rectangle.point.y, (float)(rectangle.point.x + rectangle.dimension.width), 
         (float)(rectangle.point.y + rectangle.dimension.height));
 }
@@ -21,13 +26,9 @@ typedef struct {
     point_t end;
 } moving_shape_t;
 
-CField field({WIDTH, HEIGHT});
-
-static const int moving_shapes_count = 50;
-
 moving_shape_t *moving_shapes = NULL;
 
-shape_t *rectangle_new(int x, int y, int width, int height, void (*draw)(shape_t shape)) {
+shape_t *rectangle_new(int x, int y, int width, int height, void (*draw)(const shape_t& shape)) {
     shape_t *r = (shape_t *) malloc(sizeof(shape_t));
     r->point.x = x;
     r->point.y = y;
@@ -37,28 +38,30 @@ shape_t *rectangle_new(int x, int y, int width, int height, void (*draw)(shape_t
     return r;
 }
 
-void white_draw(shape_t rectangle) {
+void white_draw(const shape_t& rectangle) {
     glColor3f(1.0, 1.0, 1.0);
     rectangle_draw(rectangle);
 }
 
-void blue_draw(shape_t rectangle) {
+void blue_draw(const shape_t& rectangle) {
     glColor3f(0.0, 0.0, 1.0);
     rectangle_draw(rectangle);
 }
 
-void red_draw(shape_t rectangle) {
+void red_draw(const shape_t& rectangle) {
     glColor3f(1.0, 0.0, 0.0);
     rectangle_draw(rectangle);
 }
 
-void green_draw(shape_t rectangle) {
+void green_draw(const shape_t& rectangle) {
     glColor3f(0.0, 1.0, 0.0);
     rectangle_draw(rectangle);
 }
 
 void field_init() {
-    field = CField({WIDTH, HEIGHT});
+//	dimension_t d;
+//	d = {WIDTH, HEIGHT};
+//    field = CField(d);
 
     field.add(rectangle_new(10, 10, 10, 10, white_draw));
 
@@ -92,10 +95,10 @@ void display(void)
 /* clear all pixels  */
     glClear (GL_COLOR_BUFFER_BIT);
 
-    vector<shape_t *> *shapes = field.get_shapes();
+    vector<const shape_t *> *shapes = field.get_shapes();
 
     for (unsigned int i = 0; i < shapes->size(); i++) {
-        shape_t *s = (*shapes)[i];
+        const shape_t *s = (*shapes)[i];
         glColor3f (1.0, 1.0, 1.0);
         s->draw(*s);
     }
