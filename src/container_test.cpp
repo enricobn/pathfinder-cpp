@@ -31,7 +31,7 @@ void Node::print() {
 
 void test_vector();
 
-void test_list();
+//void test_list();
 
 int main(int argc, char** argv) {
     printf("vector\n");

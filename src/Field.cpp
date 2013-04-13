@@ -5,7 +5,7 @@ CField::CField(const dimension_t& dimension) : _dimension(dimension) {
 }
 
 int CField::is_occupied(const point_t& point) {
-    for (unsigned int i =0; i < _shapes.size(); i++) {
+    for (unsigned int i = 0; i < _shapes.size(); i++) {
         const shape_t *element = _shapes[i];
         if (point.x >= element->point.x && point.y >= element->point.y
                 && point.x <= (element->point.x + element->dimension.width - 1) 

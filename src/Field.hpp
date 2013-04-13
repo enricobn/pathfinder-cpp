@@ -19,7 +19,7 @@ struct point_t {
     	}
     }
 
-    bool operator==(const point_t &other) const {
+    inline bool operator==(const point_t &other) const {
     	return x == other.x && y == other.y;
     }
 

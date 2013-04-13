@@ -102,41 +102,6 @@ void print_point(point_t point) {
 	printf("(%d,%d)", point.x, point.y);
 }
 
-static point_t *get_adjacents(point_t point) {
-    if (adjacents_tmp == NULL) {
-        adjacents_tmp = (point_t *)malloc(sizeof(point_t) * 8);
-        if (adjacents_tmp == NULL) {
-            ERROR("Cannot allocate adjacents_tmp.");
-            exit(TRUE);
-        }
-    }
-    adjacents_tmp[0].x = point.x + 1;
-    adjacents_tmp[0].y = point.y;
-
-    adjacents_tmp[1].x = point.x + 1;
-    adjacents_tmp[1].y = point.y + 1;
-
-    adjacents_tmp[2].x = point.x;
-    adjacents_tmp[2].y = point.y + 1;
-
-    adjacents_tmp[3].x = point.x - 1;
-    adjacents_tmp[3].y = point.y + 1;
-
-    adjacents_tmp[4].x = point.x - 1;
-    adjacents_tmp[4].y = point.y;
-
-    adjacents_tmp[5].x = point.x - 1;
-    adjacents_tmp[5].y = point.y - 1;
-
-    adjacents_tmp[6].x = point.x;
-    adjacents_tmp[6].y = point.y - 1;
-
-    adjacents_tmp[7].x = point.x + 1;
-    adjacents_tmp[7].y = point.y - 1;
-    
-    return adjacents_tmp;
-}
-
 /*
 int find_node(vector<CPathNode *> nodes, CPathNode *node) {
     for (unsigned int i = 0; i < nodes.size(); i++ ) {
@@ -157,6 +122,8 @@ static map<point_t, CPathNode*> *open = NULL;
 static map<point_t, CPathNode*> *closed = NULL;
 
 FILE *file = NULL;
+
+point_t adjacent = point_t();
 
 CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
 	#ifdef PRINT
@@ -221,45 +188,50 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
             break;
         }
 
-        point_t *adjacents = get_adjacents(min_node->get_point());
-
-        for (int i = 0; i < 8; i++) {
-            point_t point = adjacents[i];
-			#ifdef FPRINT
-//            	fprint_point(file, point);
-			#endif
-			#ifdef PRINT
-            	printf("adjacent");
-            	print_point(point);
-            	printf("\n");
-			#endif
-            // I do not consider the end point to be occupied, so I can move towards it
-            if (field.contains(point) && (point == to || !field.is_occupied(point))) {
-                map<point_t,CPathNode *>::iterator iClosed = closed->find(point);
-                if (iClosed == closed->end()) {
-                    CPathNode *node = new CPathNode(min_node, point, to);
-                    if (node == NULL) {
-                        ERROR("Error allocating new node");
-                    }
-                	map<point_t,CPathNode *>::iterator iOpen = open->find(point);
-                    if (iOpen == open->end()) {
-                    	open->insert(pair<point_t,CPathNode *>(point, node));
-                    } else {
-						#ifdef PRINT
-                    		printf("Found (%d,%d)\n", iOpen->first.x, iOpen->first.y);
-						#endif
-                    	CPathNode *got = iOpen->second;
-
-						int gToMin = min_node->G_vs(got);
-						if (gToMin < node->get_G()) {
-							got->set_parent(min_node);
+        point_t min_node_point = min_node->get_point();
+        for (int x = min_node_point.x -1; x < min_node_point.x + 2; x++) {
+    		adjacent.x = x;
+        	for (int y = min_node_point.y -1; y < min_node_point.y + 2 ; y++) {
+        		if (x == min_node_point.x && y == min_node_point.y) {
+        			continue;
+        		}
+        		adjacent.y = y;
+				#ifdef FPRINT
+	//            	fprint_point(file, point);
+				#endif
+				#ifdef PRINT
+					printf("adjacent");
+					print_point(adjacent);
+					printf("\n");
+				#endif
+				// I do not consider the end point to be occupied, so I can move towards it
+				if (field.contains(adjacent) && (adjacent == to || !field.is_occupied(adjacent))) {
+					map<point_t,CPathNode *>::iterator iClosed = closed->find(adjacent);
+					if (iClosed == closed->end()) {
+						CPathNode *node = new CPathNode(min_node, adjacent, to);
+						if (node == NULL) {
+							ERROR("Error allocating new node");
 						}
-                    	delete node;
-                    }
-                }
-            }
-        }
+						map<point_t,CPathNode *>::iterator iOpen = open->find(adjacent);
+						if (iOpen == open->end()) {
+							open->insert(pair<point_t,CPathNode *>(adjacent, node));
+						} else {
+							#ifdef PRINT
+								printf("Found (%d,%d)\n", iOpen->first.x, iOpen->first.y);
+							#endif
+							CPathNode *got = iOpen->second;
 
+							int gToMin = min_node->G_vs(got);
+							if (gToMin < node->get_G()) {
+								got->set_parent(min_node);
+							}
+							delete node;
+						}
+					}
+                }
+
+        	}
+        }
         open->erase(min_node->get_point());
         closed->insert(pair<point_t,CPathNode *>(min_node->get_point(), min_node));
     }
