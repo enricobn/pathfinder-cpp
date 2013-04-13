@@ -92,8 +92,6 @@ point_t& CPathNode::get_point() {
     return _point;
 }
 
-static point_t *adjacents_tmp = NULL;
-
 void fprint_point(FILE *file, point_t point) {
 	fprintf(file, "(%d,%d)\n", point.x, point.y);
 }
