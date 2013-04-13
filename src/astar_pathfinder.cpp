@@ -10,87 +10,11 @@
 #include "astar_pathfinder.hpp"
 #include "Field.hpp"
 #include "List.hpp"
+#include "PathNode.hpp"
 
 #define null 0
 //#define PRINT
 //#define FPRINT
-
-class CPathNode {
-    private :
-        CPathNode *_parent;
-        point_t _point;
-        point_t _to;
-        int _F;
-        int _G;
-        int _H;
-    public :
-        CPathNode(CPathNode *parent, point_t& point, point_t& to);
-        CPathNode *get_parent();
-        void set_parent(CPathNode *parent);
-        point_t& get_point();
-        int get_F();
-        int get_G();
-        int G_vs(const CPathNode *vs);
-        bool operator ==(const CPathNode& other);
-        void print();
-        void fprint(FILE *file);
-};
-
-CPathNode::CPathNode(CPathNode *parent, point_t& point, point_t& to) {
-    _parent = parent;
-    _point = point;
-    _to = to;
-    _H = (abs(to.x - point.x) + abs(to.y - point.y)) * 10;    
-    _G = G_vs(parent);
-    _F = _H + _G;
-}
-
-void CPathNode::set_parent(CPathNode *parent) {
-    _H = (abs(_to.x - _point.x) + abs(_to.y - _point.y)) * 10;
-    _G = G_vs(parent);
-    _F = _H + _G;
-}
-
-void CPathNode::print() {
-	printf("(%d,%d)=%d\n", _point.x, _point.y, _F);
-}
-
-void CPathNode::fprint(FILE *file) {
-	fprintf(file, "(%d,%d)=%d\n", _point.x, _point.y, _F);
-}
-
-int CPathNode::G_vs(const CPathNode *vs) {
-    if (vs == NULL) {
-        return 0;
-    }
-    int g = vs->_G;
-    if (_point.x == vs->_point.x || _point.y == vs->_point.y) {
-        g += 10;
-    } else {
-        g += 14;
-    }
-    return g;
-}
-
-bool CPathNode::operator ==(const CPathNode& other) {
-    return _point == other._point;
-}
-
-CPathNode *CPathNode::get_parent() {
-    return _parent;
-}
-
-int CPathNode::get_F() {
-    return _F;
-}
-
-int CPathNode::get_G() {
-    return _G;
-}
-
-point_t& CPathNode::get_point() {
-    return _point;
-}
 
 void fprint_point(FILE *file, point_t point) {
 	fprintf(file, "(%d,%d)\n", point.x, point.y);
@@ -100,30 +24,18 @@ void print_point(point_t point) {
 	printf("(%d,%d)", point.x, point.y);
 }
 
-/*
-int find_node(vector<CPathNode *> nodes, CPathNode *node) {
-    for (unsigned int i = 0; i < nodes.size(); i++ ) {
-        CPathNode *iNode = nodes[i];
-        if (*iNode == *node) {
-            return TRUE;
-        }
-    }
-    return FALSE;
-}
-*/
-
-int CPathNode_equals(CPathNode *e1, CPathNode *e2) {
+int PathNode_equals(PathNode *e1, PathNode *e2) {
 	return e1->get_point() == e2->get_point();
 }
 
-static map<point_t, CPathNode*> *open = NULL;
-static map<point_t, CPathNode*> *closed = NULL;
+static map<point_t, PathNode*> *open = NULL;
+static map<point_t, PathNode*> *closed = NULL;
 
 FILE *file = NULL;
 
 point_t adjacent = point_t();
 
-CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
+PathNode *get_path_internal(CField& field, point_t from, point_t to) {
 	#ifdef PRINT
 		printf("get_path_internal ");
 		print_point(from);
@@ -141,18 +53,17 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
 		fprintf(file, "to");
 		fprint_point(file, to);
 	#endif
-//    open.reserve(10000);
-//    closed.reserve(10000);
-    open = new map<point_t, CPathNode *>();
-    closed = new map<point_t, CPathNode *>();
-    
-    CPathNode *from_node = new CPathNode(NULL, from, to);
-    if (from_node == NULL) {
-    	ERROR("Cannot create new CPathNode");
-    }
-    open->insert(pair<point_t,CPathNode *>(from, from_node));
 
-    CPathNode *target_node = NULL;
+    open = new map<point_t, PathNode *>();
+    closed = new map<point_t, PathNode *>();
+    
+    PathNode *from_node = new PathNode(NULL, from, to);
+    if (from_node == NULL) {
+    	ERROR("Cannot create new PathNode");
+    }
+    open->insert(pair<point_t,PathNode *>(from, from_node));
+
+    PathNode *target_node = NULL;
 
     while (TRUE) {
 		#ifdef FPRINT
@@ -165,10 +76,10 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
             return NULL;
         }
         int min = INT_MAX;
-        CPathNode *min_node = NULL;
+        PathNode *min_node = NULL;
 
-        for( map<point_t,CPathNode *>::iterator ii=open->begin(); ii!= open->end(); ++ii) {
-        	CPathNode *node = (*ii).second;
+        for( map<point_t,PathNode *>::iterator ii=open->begin(); ii!= open->end(); ++ii) {
+        	PathNode *node = (*ii).second;
             if (min_node == NULL || node->get_F() < min) {
                 min = node->get_F();
                 min_node = node;
@@ -180,8 +91,6 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
 		#endif
 
         if (min_node->get_point() == to) {
-//            target_node = (CPathNode *)malloc(sizeof(CPathNode));
-//            memcpy(target_node, min_node, sizeof(CPathNode));
         	target_node = min_node;
             break;
         }
@@ -204,20 +113,20 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
 				#endif
 				// I do not consider the end point to be occupied, so I can move towards it
 				if (field.contains(adjacent) && (adjacent == to || !field.is_occupied(adjacent))) {
-					map<point_t,CPathNode *>::iterator iClosed = closed->find(adjacent);
+					map<point_t,PathNode *>::iterator iClosed = closed->find(adjacent);
 					if (iClosed == closed->end()) {
-						CPathNode *node = new CPathNode(min_node, adjacent, to);
+						PathNode *node = new PathNode(min_node, adjacent, to);
 						if (node == NULL) {
 							ERROR("Error allocating new node");
 						}
-						map<point_t,CPathNode *>::iterator iOpen = open->find(adjacent);
+						map<point_t,PathNode *>::iterator iOpen = open->find(adjacent);
 						if (iOpen == open->end()) {
-							open->insert(pair<point_t,CPathNode *>(adjacent, node));
+							open->insert(pair<point_t,PathNode *>(adjacent, node));
 						} else {
 							#ifdef PRINT
 								printf("Found (%d,%d)\n", iOpen->first.x, iOpen->first.y);
 							#endif
-							CPathNode *got = iOpen->second;
+							PathNode *got = iOpen->second;
 
 							int gToMin = min_node->G_vs(got);
 							if (gToMin < node->get_G()) {
@@ -231,36 +140,20 @@ CPathNode *get_path_internal(CField& field, point_t from, point_t to) {
         	}
         }
         open->erase(min_node->get_point());
-        closed->insert(pair<point_t,CPathNode *>(min_node->get_point(), min_node));
+        closed->insert(pair<point_t,PathNode *>(min_node->get_point(), min_node));
     }
     return target_node;
 }
 
-/*
-void clear(vector<CPathNode*> nodes) {
-    vector<CPathNode*>::iterator it;
-    for (it = nodes.begin(); it != nodes.end(); it++ ) {
-        CPathNode *node = *it;
-        try {
-            free(node);
-        } catch(...) {
-            ERROR("Error freeing vector elements");
-        }
-    }
-    nodes.clear(); 
-}
-*/
-
-void clear(map<point_t, CPathNode *> *m) {
-	for( map<point_t,CPathNode *>::iterator ii=m->begin(); ii!= m->end(); ++ii) {
-//		delete &((*ii).first);
+void clear(map<point_t, PathNode *> *m) {
+	for( map<point_t,PathNode *>::iterator ii=m->begin(); ii!= m->end(); ++ii) {
 		delete (*ii).second;
 	}
 	delete m;
 }
 
 point_t *get_next_to_path(CField& field, point_t from, point_t to) {
-    CPathNode *target_node = get_path_internal(field, from, to);
+    PathNode *target_node = get_path_internal(field, from, to);
     if (target_node == NULL) {
         clear(open);
         clear(closed);
