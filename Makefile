@@ -5,7 +5,9 @@ SAVE-TEMPS =
 #PROFILER = -pg
 PROFILER =
 CC = g++
-DEBUG = -g
+#DEBUG = -g
+DEBUG =
+
 CFLAGS = -Wall -c $(DEBUG) -O3 -pedantic $(SAVE-TEMPS) $(PROFILER)
 LFLAGS = -Wall $(DEBUG) -o bin/$@ $(PROFILER)
 GL = -lglut -lGLU
@@ -20,11 +22,11 @@ container_test.bin : obj/container_test.o
 	@echo 'Building $@'
 	$(CC) $(LFLAGS) $^
 
-move_example.bin : obj/move_example.o obj/astar_pathfinder.o obj/Field.o 
+move_example.bin : obj/move_example.o obj/astar_pathfinder.o obj/Field.o obj/PathNode.o
 	@echo 'Building $@'
 	$(CC) $(LFLAGS) $(GL) $^
 
-field_test.bin : obj/field_test.o obj/Field.o 
+field_test.bin : obj/field_test.o obj/Field.o obj/PathNode.o
 	@echo 'Building $@ with $^'
 	$(CC) $(LFLAGS) $^
 
