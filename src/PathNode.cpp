@@ -43,23 +43,3 @@ int PathNode::G_vs(const PathNode *vs) {
     }
     return g;
 }
-
-bool PathNode::operator ==(const PathNode& other) {
-    return _point == other._point;
-}
-
-PathNode *PathNode::get_parent() {
-    return _parent;
-}
-
-int PathNode::get_F() {
-    return _F;
-}
-
-int PathNode::get_G() {
-    return _G;
-}
-
-point_t& PathNode::get_point() {
-    return _point;
-}

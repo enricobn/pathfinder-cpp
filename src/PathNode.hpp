@@ -39,4 +39,24 @@ class PathNode {
         void fprint(FILE *file);
 };
 
+inline bool PathNode::operator ==(const PathNode& other) {
+    return _point == other._point;
+}
+
+inline PathNode *PathNode::get_parent() {
+    return _parent;
+}
+
+inline int PathNode::get_F() {
+    return _F;
+}
+
+inline int PathNode::get_G() {
+    return _G;
+}
+
+inline point_t& PathNode::get_point() {
+    return _point;
+}
+
 #endif /* PATHNODE_HPP_ */

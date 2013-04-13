@@ -16,12 +16,6 @@ int CField::is_occupied(const point_t& point) {
     return FALSE;
 }
 
-int CField::contains(const point_t& point) {
-    return (point.x >= 0 && point.y >= 0
-        && point.x < _dimension.width
-        && point.y < _dimension.height);
-}
-
 void CField::add(const shape_t *shape) {
     _shapes.push_back(shape);
 }

@@ -79,4 +79,11 @@ class CField {
         vector<const shape_t *> *get_shapes();
 };
 
+inline int CField::contains(const point_t& point) {
+    return (point.x >= 0 && point.y >= 0
+        && point.x < _dimension.width
+        && point.y < _dimension.height);
+}
+
+
 #endif
