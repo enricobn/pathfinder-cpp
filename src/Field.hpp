@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <vector>
+#include <unordered_map>
 using namespace std;
 
 #ifndef FIELD_H_
@@ -26,6 +27,12 @@ struct point_t {
     void print() {
         printf("(%d, %d)", x, y);
     }
+};
+
+struct point_t_hash {
+	inline size_t operator()(const point_t& point) const {
+		return hash<int>()(point.x * 1000 + point.y);
+	}
 };
 
 struct dimension_t {

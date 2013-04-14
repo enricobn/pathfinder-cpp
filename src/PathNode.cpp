@@ -8,10 +8,8 @@
 #include "globals.hpp"
 #include "PathNode.hpp"
 
-PathNode::PathNode(PathNode *parent, point_t& point, point_t& to) {
-    _parent = parent;
-    _point = point;
-    _to = to;
+PathNode::PathNode(PathNode *parent, point_t& point, point_t& to) : _parent(parent), _point(point), _to(to)
+{
     _H = (abs(to.x - point.x) + abs(to.y - point.y)) * 10;
     _G = G_vs(parent);
     _F = _H + _G;

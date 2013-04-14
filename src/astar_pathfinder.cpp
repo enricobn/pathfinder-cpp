@@ -6,11 +6,13 @@
 #include <limits.h>
 #include <algorithm>
 #include <map>
+#include <unordered_map>
 #include "globals.hpp"
 #include "astar_pathfinder.hpp"
 #include "Field.hpp"
 #include "List.hpp"
 #include "PathNode.hpp"
+#include "NodesMap.hpp"
 
 #define null 0
 //#define PRINT
@@ -28,8 +30,10 @@ int PathNode_equals(PathNode *e1, PathNode *e2) {
 	return e1->get_point() == e2->get_point();
 }
 
-static map<point_t, PathNode*> *open = NULL;
+static unordered_map<point_t, PathNode*, point_t_hash> *open = NULL;
+//static map<point_t, PathNode*> *open = NULL;
 static map<point_t, PathNode*> *closed = NULL;
+//static NodesMap *openMap = NULL;
 
 FILE *file = NULL;
 
@@ -54,14 +58,17 @@ PathNode *get_path_internal(CField& field, point_t from, point_t to) {
 		fprint_point(file, to);
 	#endif
 
-    open = new map<point_t, PathNode *>();
+    open = new unordered_map<point_t, PathNode *, point_t_hash>();
+//    open = new map<point_t, PathNode *>();
     closed = new map<point_t, PathNode *>();
+//    openMap = new NodesMap();
     
     PathNode *from_node = new PathNode(NULL, from, to);
     if (from_node == NULL) {
     	ERROR("Cannot create new PathNode");
     }
     open->insert(pair<point_t,PathNode *>(from, from_node));
+//    openMap->add(from_node);
 
     PathNode *target_node = NULL;
 
@@ -78,7 +85,8 @@ PathNode *get_path_internal(CField& field, point_t from, point_t to) {
         int min = INT_MAX;
         PathNode *min_node = NULL;
 
-        for( map<point_t,PathNode *>::iterator ii=open->begin(); ii!= open->end(); ++ii) {
+        for( unordered_map<point_t,PathNode *>::iterator ii=open->begin(); ii!= open->end(); ++ii) {
+//        for( map<point_t,PathNode *>::iterator ii=open->begin(); ii!= open->end(); ++ii) {
         	PathNode *node = (*ii).second;
             if (min_node == NULL || node->get_F() < min) {
                 min = node->get_F();
@@ -119,9 +127,13 @@ PathNode *get_path_internal(CField& field, point_t from, point_t to) {
 						if (node == NULL) {
 							ERROR("Error allocating new node");
 						}
-						map<point_t,PathNode *>::iterator iOpen = open->find(adjacent);
+//						PathNode *got = openMap->find(adjacent);
+						unordered_map<point_t,PathNode *>::iterator iOpen = open->find(adjacent);
+						//map<point_t,PathNode *>::iterator iOpen = open->find(adjacent);
 						if (iOpen == open->end()) {
+//						if (got == NULL) {
 							open->insert(pair<point_t,PathNode *>(adjacent, node));
+//							openMap->add(node);
 						} else {
 							#ifdef PRINT
 								printf("Found (%d,%d)\n", iOpen->first.x, iOpen->first.y);
@@ -140,6 +152,7 @@ PathNode *get_path_internal(CField& field, point_t from, point_t to) {
         	}
         }
         open->erase(min_node->get_point());
+
         closed->insert(pair<point_t,PathNode *>(min_node->get_point(), min_node));
     }
     return target_node;
@@ -147,6 +160,13 @@ PathNode *get_path_internal(CField& field, point_t from, point_t to) {
 
 void clear(map<point_t, PathNode *> *m) {
 	for( map<point_t,PathNode *>::iterator ii=m->begin(); ii!= m->end(); ++ii) {
+		delete (*ii).second;
+	}
+	delete m;
+}
+
+void clear(unordered_map<point_t, PathNode *, point_t_hash> *m) {
+	for( unordered_map<point_t,PathNode *, point_t_hash>::iterator ii=m->begin(); ii!= m->end(); ++ii) {
 		delete (*ii).second;
 	}
 	delete m;
