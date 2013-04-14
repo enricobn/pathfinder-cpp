@@ -62,9 +62,9 @@ StandardField::StandardField(const dimension_t& dimension) :
 int StandardField::is_occupied(const point_t& point) const {
     for (unsigned int i = 0; i < _shapes.size(); i++) {
         const shape_t *element = _shapes[i];
-        if (point.x >= element->point.x && point.y >= element->point.y
-                && point.x <= (element->point.x + element->dimension.width - 1)
-                && point.y <= (element->point.y + element->dimension.height - 1)) {
+        if (point.x >= element->getPoint()->x && point.y >= element->getPoint()->y
+                && point.x <= (element->getPoint()->x + element->dimension.width - 1)
+                && point.y <= (element->getPoint()->y + element->dimension.height - 1)) {
              return TRUE;
          }
     }
@@ -94,9 +94,9 @@ SubField::SubField(const point_t& point, const dimension_t& dimension) :
 int SubField::is_occupied(const point_t& point) const {
     for (unsigned int i = 0; i < _shapes.size(); i++) {
         const shape_t *element = _shapes[i];
-        if (point.x >= element->point.x && point.y >= element->point.y
-                && point.x <= (element->point.x + element->dimension.width - 1)
-                && point.y <= (element->point.y + element->dimension.height - 1)) {
+        if (point.x >= element->getPoint()->x && point.y >= element->getPoint()->y
+                && point.x <= (element->getPoint()->x + element->dimension.width - 1)
+                && point.y <= (element->getPoint()->y + element->dimension.height - 1)) {
              return TRUE;
          }
     }
@@ -116,6 +116,6 @@ vector<const shape_t *> *SubField::get_shapes() {
 }
 
 int SubField::contains(const shape_t* shape) const {
-	return contains(shape->point);
+	return contains(*shape->getPoint());
 }
 

@@ -49,7 +49,7 @@ struct dimension_t {
     	this->height = d.height;
     }
 
-    void print() {
+    void print() const {
         printf("(%d, %d)", width, height);
     }
 };
@@ -57,14 +57,28 @@ struct dimension_t {
 struct shape_t;
 
 struct shape_t {
-    point_t point;
-    dimension_t dimension;
+private:
+    point_t _point;
+public:
+    const dimension_t dimension;
+
+    shape_t(point_t point, dimension_t dimension) : _point(point), dimension(dimension) {
+    	draw = 0;
+    }
 
     void (*draw)(const shape_t&);
 
+    const point_t* getPoint() const {
+    	return &_point;
+    }
+
+    void setPoint(const point_t& point) {
+    	_point = point;
+    }
+
     void print() {
         printf("shape p");
-        point.print();
+        _point.print();
         printf(" d");
         dimension.print();
     };

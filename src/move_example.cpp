@@ -17,8 +17,8 @@ dimension_t dimension = dimension_t(WIDTH, HEIGHT);
 StandardField field(dimension);
 
 void rectangle_draw(const shape_t& rectangle) {
-    glRectf((float)rectangle.point.x, (float)rectangle.point.y, (float)(rectangle.point.x + rectangle.dimension.width), 
-        (float)(rectangle.point.y + rectangle.dimension.height));
+    glRectf((float)rectangle.getPoint()->x, (float)rectangle.getPoint()->y, (float)(rectangle.getPoint()->x + rectangle.dimension.width),
+        (float)(rectangle.getPoint()->y + rectangle.dimension.height));
 }
 
 typedef struct {
@@ -29,11 +29,12 @@ typedef struct {
 moving_shape_t *moving_shapes = NULL;
 
 shape_t *rectangle_new(int x, int y, int width, int height, void (*draw)(const shape_t& shape)) {
-    shape_t *r = (shape_t *) malloc(sizeof(shape_t));
-    r->point.x = x;
-    r->point.y = y;
-    r->dimension.width = width;
-    r->dimension.height = height;
+//    shape_t *r = (shape_t *) malloc(sizeof(shape_t));
+	shape_t* r = new shape_t({x,y}, {width, height});
+//    r->getPoint().x = x;
+//    r->getPoint().y = y;
+//    r->dimension.width = width;
+//    r->dimension.height = height;
     r->draw = draw;
     return r;
 }
@@ -129,10 +130,10 @@ void animate() {
     for (int i = 0; i < moving_shapes_count * 2; i++) {
 //        printf("moving_shape %d ", i);
 //        moving_shapes[i].shape->print();
-        if (moving_shapes[i].shape->point == moving_shapes[i].end) {
+        if (*(moving_shapes[i].shape->getPoint()) == moving_shapes[i].end) {
             continue;
         }
-        point_t *point = get_next_to_path(field, moving_shapes[i].shape->point, moving_shapes[i].end);
+        point_t *point = get_next_to_path(field, *(moving_shapes[i].shape->getPoint()), moving_shapes[i].end);
         if (point == NULL) {
 /*            printf("empty path\n");*/
             continue;
@@ -144,7 +145,7 @@ void animate() {
 //        moving_shapes[i].shape->point.x = point->x;
 //        moving_shapes[i].shape->point.y = point->y;
 
-        moving_shapes[i].shape->point = *point;
+        moving_shapes[i].shape->setPoint(*point);
         free(point);
     }
 
