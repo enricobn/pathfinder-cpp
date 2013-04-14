@@ -109,5 +109,30 @@ inline int CField::contains(const point_t& point) {
         && point.y < _dimension.height);
 }
 
+class SubField : public ShapeContainer {
+    private:
+        vector<const shape_t *> _shapes;
+        const point_t _point;
+        const dimension_t _dimension;
+    public:
+        SubField(const point_t&, const dimension_t&);
+
+        int is_occupied(const point_t&);
+
+        int contains(const point_t&);
+
+        void add(const shape_t *);
+
+        vector<const shape_t *> *get_shapes();
+
+        virtual ~SubField();
+};
+
+inline int SubField::contains(const point_t& point) {
+    return (point.x >= _point.x && point.y >= _point.y
+        && point.x < (_point.x + _dimension.width)
+        && point.y < (_point.y + _dimension.height));
+}
+
 
 #endif
