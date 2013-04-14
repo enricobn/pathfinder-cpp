@@ -31,8 +31,9 @@ int PathNode_equals(PathNode *e1, PathNode *e2) {
 }
 
 static unordered_map<point_t, PathNode*, point_t_hash> *open = NULL;
+static unordered_map<point_t, PathNode*, point_t_hash> *closed = NULL;
 //static map<point_t, PathNode*> *open = NULL;
-static map<point_t, PathNode*> *closed = NULL;
+//static map<point_t, PathNode*> *closed = NULL;
 //static NodesMap *openMap = NULL;
 
 FILE *file = NULL;
@@ -59,8 +60,9 @@ PathNode *get_path_internal(CField& field, point_t from, point_t to) {
 	#endif
 
     open = new unordered_map<point_t, PathNode *, point_t_hash>();
+    closed = new unordered_map<point_t, PathNode *, point_t_hash>();
 //    open = new map<point_t, PathNode *>();
-    closed = new map<point_t, PathNode *>();
+//    closed = new map<point_t, PathNode *>();
 //    openMap = new NodesMap();
     
     PathNode *from_node = new PathNode(NULL, from, to);
@@ -121,7 +123,8 @@ PathNode *get_path_internal(CField& field, point_t from, point_t to) {
 				#endif
 				// I do not consider the end point to be occupied, so I can move towards it
 				if (field.contains(adjacent) && (adjacent == to || !field.is_occupied(adjacent))) {
-					map<point_t,PathNode *>::iterator iClosed = closed->find(adjacent);
+//					map<point_t,PathNode *>::iterator iClosed = closed->find(adjacent);
+					unordered_map<point_t,PathNode *>::iterator iClosed = closed->find(adjacent);
 					if (iClosed == closed->end()) {
 						PathNode *node = new PathNode(min_node, adjacent, to);
 						if (node == NULL) {
