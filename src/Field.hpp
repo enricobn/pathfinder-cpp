@@ -70,7 +70,22 @@ struct shape_t {
     };
 };
 
-class CField {
+class ShapeContainer {
+
+public:
+    virtual int is_occupied(const point_t&) = 0;
+
+    virtual int contains(const point_t&) = 0;
+
+    virtual void add(const shape_t *) = 0;
+
+    virtual vector<const shape_t *> *get_shapes() = 0;
+
+    virtual ~ShapeContainer() {}
+
+};
+
+class CField : public ShapeContainer {
     private:
         vector<const shape_t *> _shapes;
         const dimension_t _dimension;
@@ -84,6 +99,8 @@ class CField {
         void add(const shape_t *);
         
         vector<const shape_t *> *get_shapes();
+
+        virtual ~CField();
 };
 
 inline int CField::contains(const point_t& point) {

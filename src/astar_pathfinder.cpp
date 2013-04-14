@@ -40,7 +40,7 @@ FILE *file = NULL;
 
 point_t adjacent = point_t();
 
-PathNode *get_path_internal(CField& field, point_t from, point_t to) {
+PathNode *get_path_internal(ShapeContainer& field, point_t from, point_t to) {
 	#ifdef PRINT
 		printf("get_path_internal ");
 		print_point(from);
@@ -175,7 +175,7 @@ void clear(unordered_map<point_t, PathNode *, point_t_hash> *m) {
 	delete m;
 }
 
-point_t *get_next_to_path(CField& field, point_t from, point_t to) {
+point_t *get_next_to_path(ShapeContainer& field, point_t from, point_t to) {
     PathNode *target_node = get_path_internal(field, from, to);
     if (target_node == NULL) {
         clear(open);

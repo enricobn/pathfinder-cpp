@@ -20,6 +20,10 @@ void CField::add(const shape_t *shape) {
     _shapes.push_back(shape);
 }
 
+CField::~CField() {
+
+}
+
 vector<const shape_t *> *CField::get_shapes() {
     return &_shapes;
 }
