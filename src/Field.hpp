@@ -73,9 +73,9 @@ struct shape_t {
 class ShapeContainer {
 
 public:
-    virtual int is_occupied(const point_t&) = 0;
+    virtual int is_occupied(const point_t&) const = 0;
 
-    virtual int contains(const point_t&) = 0;
+    virtual int contains(const point_t&) const = 0;
 
     virtual void add(const shape_t *) = 0;
 
@@ -85,30 +85,6 @@ public:
 
 };
 
-class CField : public ShapeContainer {
-    private:
-        vector<const shape_t *> _shapes;
-        const dimension_t _dimension;
-    public:
-        CField(const dimension_t&);
-        
-        int is_occupied(const point_t&);
-        
-        int contains(const point_t&);
-        
-        void add(const shape_t *);
-        
-        vector<const shape_t *> *get_shapes();
-
-        virtual ~CField();
-};
-
-inline int CField::contains(const point_t& point) {
-    return (point.x >= 0 && point.y >= 0
-        && point.x < _dimension.width
-        && point.y < _dimension.height);
-}
-
 class SubField : public ShapeContainer {
     private:
         vector<const shape_t *> _shapes;
@@ -117,9 +93,11 @@ class SubField : public ShapeContainer {
     public:
         SubField(const point_t&, const dimension_t&);
 
-        int is_occupied(const point_t&);
+        int is_occupied(const point_t&) const;
 
-        int contains(const point_t&);
+        int contains(const point_t&) const;
+
+        int contains(const shape_t*) const;
 
         void add(const shape_t *);
 
@@ -128,11 +106,63 @@ class SubField : public ShapeContainer {
         virtual ~SubField();
 };
 
-inline int SubField::contains(const point_t& point) {
+inline int SubField::contains(const point_t& point) const {
     return (point.x >= _point.x && point.y >= _point.y
         && point.x < (_point.x + _dimension.width)
         && point.y < (_point.y + _dimension.height));
 }
 
+// StandardField
+
+class StandardField : public ShapeContainer {
+    private:
+        vector<const shape_t *> _shapes;
+        const dimension_t _dimension;
+    public:
+        StandardField(const dimension_t&);
+
+        int is_occupied(const point_t&) const;
+
+        int contains(const point_t&) const;
+
+        void add(const shape_t *);
+
+        vector<const shape_t *> *get_shapes();
+
+        virtual ~StandardField();
+};
+
+inline int StandardField::contains(const point_t& point) const {
+    return (point.x >= 0 && point.y >= 0
+        && point.x < _dimension.width
+        && point.y < _dimension.height);
+}
+
+// CField
+
+class CField : public ShapeContainer {
+    private:
+        vector<const shape_t *> _shapes;
+        const dimension_t _dimension;
+        vector<SubField*> _subFields;
+    public:
+        CField(const dimension_t&, const int);
+
+        int is_occupied(const point_t&) const;
+
+        int contains(const point_t&) const;
+
+        void add(const shape_t *);
+
+        vector<const shape_t *> *get_shapes();
+
+        virtual ~CField();
+};
+
+inline int CField::contains(const point_t& point) const {
+    return (point.x >= 0 && point.y >= 0
+        && point.x < _dimension.width
+        && point.y < _dimension.height);
+}
 
 #endif

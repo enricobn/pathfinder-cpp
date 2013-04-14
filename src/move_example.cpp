@@ -14,7 +14,7 @@ static const int moving_shapes_count = 50;
 
 dimension_t dimension = dimension_t(WIDTH, HEIGHT);
 
-CField field(dimension);
+StandardField field(dimension);
 
 void rectangle_draw(const shape_t& rectangle) {
     glRectf((float)rectangle.point.x, (float)rectangle.point.y, (float)(rectangle.point.x + rectangle.dimension.width), 
@@ -141,8 +141,10 @@ void animate() {
 */
         }
         
-        moving_shapes[i].shape->point.x = point->x;
-        moving_shapes[i].shape->point.y = point->y;
+//        moving_shapes[i].shape->point.x = point->x;
+//        moving_shapes[i].shape->point.y = point->y;
+
+        moving_shapes[i].shape->point = *point;
         free(point);
     }
 
