@@ -1,6 +1,7 @@
 /*
  * move_example.c
  * This is a path finding example using ASearch
+ * 14 Apr 2013 time 6.590
  */
 #include <unistd.h>
 #include <GL/glut.h>

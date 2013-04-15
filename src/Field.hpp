@@ -67,7 +67,7 @@ public:
 
     virtual vector<shape_t *> *get_shapes() = 0;
 
-    virtual void shapeMoved(shape_t&, const point_t&) = 0;
+    virtual void shapeBeforeMove(shape_t&, const point_t&) = 0;
 
     virtual ~ShapeContainer() {}
 
@@ -96,7 +96,7 @@ public:
 
     void setPoint(const point_t& point) {
     	if (_shapeContainer != 0) {
-    		_shapeContainer->shapeMoved(*this, point);
+    		_shapeContainer->shapeBeforeMove(*this, point);
     	}
     	_point = point;
     }
@@ -123,7 +123,9 @@ class SubField : public ShapeContainer {
 
         int contains(const int, const int) const;
 
-        int accepts(const shape_t*) const;
+        int contains(const point_t& point, const dimension_t& dimension) const;
+
+        int containsEntirely(const point_t& point, const dimension_t& dimension) const;
 
         void remove(const shape_t*);
 
@@ -131,21 +133,23 @@ class SubField : public ShapeContainer {
 
         vector<shape_t *> *get_shapes();
 
-        void shapeMoved(shape_t&, const point_t&);
+        void shapeBeforeMove(shape_t&, const point_t&);
 
         virtual ~SubField();
 };
 
 inline int SubField::contains(const int x, const int y) const {
-    return (x >= _point.x && y >= _point.y
-        && x < (_point.x + _dimension.width)
-        && y < (_point.y + _dimension.height));
+	return x >= _point.x
+			&& y >= _point.y
+			&& x < (_point.x + _dimension.width)
+			&& y < (_point.y + _dimension.height);
 }
 
 inline int SubField::contains(const point_t& point) const {
-    return (point.x >= _point.x && point.y >= _point.y
-        && point.x < (_point.x + _dimension.width)
-        && point.y < (_point.y + _dimension.height));
+	return point.x >= _point.x
+			&& point.y >= _point.y
+			&& point.x < (_point.x + _dimension.width)
+			&& point.y < (_point.y + _dimension.height);
 }
 
 // StandardField
@@ -165,15 +169,16 @@ class StandardField : public ShapeContainer {
 
         vector<shape_t *> *get_shapes();
 
-        void shapeMoved(shape_t&, const point_t&);
+        void shapeBeforeMove(shape_t&, const point_t&);
 
         virtual ~StandardField();
 };
 
 inline int StandardField::contains(const point_t& point) const {
-    return (point.x >= 0 && point.y >= 0
-        && point.x < _dimension.width
-        && point.y < _dimension.height);
+    return point.x >= 0
+    		&& point.y >= 0
+    		&& point.x < _dimension.width
+    		&& point.y < _dimension.height;
 }
 
 // ComposedField
@@ -194,15 +199,16 @@ class ComposedField : public ShapeContainer {
 
         vector<shape_t *> *get_shapes();
 
-        void shapeMoved(shape_t&, const point_t&);
+        void shapeBeforeMove(shape_t&, const point_t&);
 
         virtual ~ComposedField();
 };
 
 inline int ComposedField::contains(const point_t& point) const {
-    return (point.x >= 0 && point.y >= 0
-        && point.x < _dimension.width
-        && point.y < _dimension.height);
+    return point.x >= 0
+    		&& point.y >= 0
+    		&& point.x < _dimension.width
+    		&& point.y < _dimension.height;
 }
 
 #endif

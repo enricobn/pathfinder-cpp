@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv) {
     dimension_t dimension = dimension_t(100, 100);
-    ComposedField field = ComposedField::ComposedField(dimension, 4);
+    ComposedField field(dimension, 4);
 
     /* test contains */ 
 
@@ -33,5 +33,15 @@ int main(int argc, char** argv) {
     point_t p6 = {15, 15};
     assert(!field.is_occupied(p6));
     
+    SubField subField({10, 10},{20, 20});
+
+    assert(subField.contains({10, 10},{5, 5}));
+
+    assert(subField.containsEntirely({10, 10},{5, 5}));
+
+    assert(subField.containsEntirely({10, 10},{20, 20}));
+
+    assert(!subField.containsEntirely({10, 10},{25, 25}));
+
     return 0;
 }

@@ -38,7 +38,7 @@ int ComposedField::is_occupied(const point_t& point) const {
 void ComposedField::add(shape_t *shape) {
 	for (unsigned int i = 0; i < _subFields.size(); i++) {
 		SubField* subField = _subFields[i];
-		if (subField->accepts(shape)) {
+		if (subField->contains(*shape->getPoint(), shape->dimension)) {
 			subField->add(shape);
 			shape->_shapeContainer = this;
 		}
@@ -51,21 +51,35 @@ ComposedField::~ComposedField() {
 		delete (*i);
 	}
 
-	for (vector<shape_t*>::iterator i = _shapes.begin(); i != _shapes.end(); ++i) {
+/*	for (vector<shape_t*>::iterator i = _shapes.begin(); i != _shapes.end(); ++i) {
 		delete (*i);
 	}
-
+*/
 }
 
 vector<shape_t *> *ComposedField::get_shapes() {
     return &_shapes;
 }
 
-void ComposedField::shapeMoved(shape_t& shape, const point_t& point) {
-	for (unsigned int i = 0; i < _subFields.size(); i++) {
-		SubField* subField = _subFields[i];
-		subField->remove(&shape);
-		if (subField->accepts(&shape)) {
+void ComposedField::shapeBeforeMove(shape_t& shape, const point_t& point) {
+	for (vector<SubField*>::iterator i = _subFields.begin(); i != _subFields.end(); ++i) {
+		SubField* subField = *i;
+
+		/*
+		 * it seems to be slower!
+		if (subField->contains(*shape.getPoint(), shape.dimension)) {
+			if (subField->containsEntirely(*shape.getPoint(), shape.dimension) &&
+					subField->containsEntirely(point, shape.dimension)) {
+				break;
+			} else {
+				subField->remove(&shape);
+			}
+		}
+*/
+		if (subField->contains(*shape.getPoint(), shape.dimension)) {
+			subField->remove(&shape);
+		}
+		if (subField->contains(point, shape.dimension)) {
 			subField->add(&shape);
 		}
 	}
@@ -103,7 +117,7 @@ vector<shape_t *> *StandardField::get_shapes() {
     return &_shapes;
 }
 
-void StandardField::shapeMoved(shape_t& shape, const point_t& point) {
+void StandardField::shapeBeforeMove(shape_t& shape, const point_t& point) {
 }
 
 // SubField
@@ -132,8 +146,23 @@ void SubField::add(shape_t *shape) {
 
 void SubField::remove(const shape_t* shape) {
 	vector<shape_t*>::iterator i = find(_shapes.begin(), _shapes.end(), shape);
-	if (i != _shapes.end()) // == vector.end() means the element was not found
+	if (i != _shapes.end()) {
 		_shapes.erase(i);
+	}
+}
+
+int SubField::containsEntirely(const point_t& point, const dimension_t& dimension) const {
+	return contains(point) &&
+			contains(point.x + dimension.width -1, point.y + dimension.height -1) &&
+			contains(point.x + dimension.width -1, point.y) &&
+			contains(point.x, point.y + dimension.height -1);
+}
+
+int SubField::contains(const point_t& point, const dimension_t& dimension) const {
+	return contains(point) ||
+			contains(point.x + dimension.width -1, point.y + dimension.height -1) ||
+			contains(point.x + dimension.width -1, point.y) ||
+			contains(point.x, point.y + dimension.height -1);
 }
 
 SubField::~SubField() {
@@ -144,14 +173,7 @@ vector<shape_t *> *SubField::get_shapes() {
     return &_shapes;
 }
 
-int SubField::accepts(const shape_t* shape) const {
-	return contains(*shape->getPoint()) ||
-			contains(shape->getPoint()->x + shape->dimension.width -1, shape->getPoint()->y) ||
-			contains(shape->getPoint()->x + shape->dimension.width -1, shape->getPoint()->y + shape->dimension.height -1) ||
-			contains(shape->getPoint()->x, shape->getPoint()->y + shape->dimension.height);
-}
-
-void SubField::shapeMoved(shape_t& shape, const point_t& point) {
+void SubField::shapeBeforeMove(shape_t& shape, const point_t& point) {
 
 }
 
