@@ -2,11 +2,14 @@ VPATH=src bin
 
 #SAVE-TEMPS = -save-temps
 SAVE-TEMPS =
+
 #PROFILER = -pg
 PROFILER =
+
+#DEBUG = -g
+DEBUG =
+
 CC = g++
-DEBUG = -g
-#DEBUG =
 
 CFLAGS = -Wall -std=c++0x -c $(DEBUG) -O3 -pedantic $(SAVE-TEMPS) $(PROFILER)
 LFLAGS = -Wall $(DEBUG) -o bin/$@ $(PROFILER)
