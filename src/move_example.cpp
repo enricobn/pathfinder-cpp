@@ -189,6 +189,7 @@ int main(int argc, char** argv)
     glutDisplayFunc(display);
     glutIdleFunc(animate);
     glutMainLoop();
+
     return 0;   /* ANSI C requires main to return int. */
 }
 

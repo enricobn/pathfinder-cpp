@@ -47,6 +47,13 @@ void ComposedField::add(shape_t *shape) {
 }
 
 ComposedField::~ComposedField() {
+	for (vector<SubField*>::iterator i = _subFields.begin(); i != _subFields.end(); ++i) {
+		delete (*i);
+	}
+
+	for (vector<shape_t*>::iterator i = _shapes.begin(); i != _shapes.end(); ++i) {
+		delete (*i);
+	}
 
 }
 
