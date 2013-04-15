@@ -56,13 +56,35 @@ struct dimension_t {
 
 struct shape_t;
 
+class ShapeContainer {
+
+public:
+    virtual int is_occupied(const point_t&) const = 0;
+
+    virtual int contains(const point_t&) const = 0;
+
+    virtual void add(shape_t *) = 0;
+
+    virtual vector<shape_t *> *get_shapes() = 0;
+
+    virtual void shapeMoved(shape_t&, const point_t&) = 0;
+
+    virtual ~ShapeContainer() {}
+
+};
+
 struct shape_t {
 private:
     point_t _point;
 public:
     const dimension_t dimension;
 
-    shape_t(point_t point, dimension_t dimension) : _point(point), dimension(dimension) {
+	ShapeContainer* _shapeContainer;
+
+    shape_t(const point_t& point, const dimension_t& dimension) :
+    	_point(point), dimension(dimension)
+    {
+    	_shapeContainer = 0;
     	draw = 0;
     }
 
@@ -73,6 +95,9 @@ public:
     }
 
     void setPoint(const point_t& point) {
+    	if (_shapeContainer != 0) {
+    		_shapeContainer->shapeMoved(*this, point);
+    	}
     	_point = point;
     }
 
@@ -84,24 +109,9 @@ public:
     };
 };
 
-class ShapeContainer {
-
-public:
-    virtual int is_occupied(const point_t&) const = 0;
-
-    virtual int contains(const point_t&) const = 0;
-
-    virtual void add(const shape_t *) = 0;
-
-    virtual vector<const shape_t *> *get_shapes() = 0;
-
-    virtual ~ShapeContainer() {}
-
-};
-
 class SubField : public ShapeContainer {
     private:
-        vector<const shape_t *> _shapes;
+        vector<shape_t *> _shapes;
         const point_t _point;
         const dimension_t _dimension;
     public:
@@ -111,14 +121,26 @@ class SubField : public ShapeContainer {
 
         int contains(const point_t&) const;
 
-        int contains(const shape_t*) const;
+        int contains(const int, const int) const;
 
-        void add(const shape_t *);
+        int accepts(const shape_t*) const;
 
-        vector<const shape_t *> *get_shapes();
+        void remove(const shape_t*);
+
+        void add(shape_t *);
+
+        vector<shape_t *> *get_shapes();
+
+        void shapeMoved(shape_t&, const point_t&);
 
         virtual ~SubField();
 };
+
+inline int SubField::contains(const int x, const int y) const {
+    return (x >= _point.x && y >= _point.y
+        && x < (_point.x + _dimension.width)
+        && y < (_point.y + _dimension.height));
+}
 
 inline int SubField::contains(const point_t& point) const {
     return (point.x >= _point.x && point.y >= _point.y
@@ -130,7 +152,7 @@ inline int SubField::contains(const point_t& point) const {
 
 class StandardField : public ShapeContainer {
     private:
-        vector<const shape_t *> _shapes;
+        vector<shape_t *> _shapes;
         const dimension_t _dimension;
     public:
         StandardField(const dimension_t&);
@@ -139,9 +161,11 @@ class StandardField : public ShapeContainer {
 
         int contains(const point_t&) const;
 
-        void add(const shape_t *);
+        void add(shape_t *);
 
-        vector<const shape_t *> *get_shapes();
+        vector<shape_t *> *get_shapes();
+
+        void shapeMoved(shape_t&, const point_t&);
 
         virtual ~StandardField();
 };
@@ -152,28 +176,30 @@ inline int StandardField::contains(const point_t& point) const {
         && point.y < _dimension.height);
 }
 
-// CField
+// ComposedField
 
-class CField : public ShapeContainer {
+class ComposedField : public ShapeContainer {
     private:
-        vector<const shape_t *> _shapes;
+        vector<shape_t *> _shapes;
         const dimension_t _dimension;
         vector<SubField*> _subFields;
     public:
-        CField(const dimension_t&, const int);
+        ComposedField(const dimension_t&, const int);
 
         int is_occupied(const point_t&) const;
 
         int contains(const point_t&) const;
 
-        void add(const shape_t *);
+        void add(shape_t *);
 
-        vector<const shape_t *> *get_shapes();
+        vector<shape_t *> *get_shapes();
 
-        virtual ~CField();
+        void shapeMoved(shape_t&, const point_t&);
+
+        virtual ~ComposedField();
 };
 
-inline int CField::contains(const point_t& point) const {
+inline int ComposedField::contains(const point_t& point) const {
     return (point.x >= 0 && point.y >= 0
         && point.x < _dimension.width
         && point.y < _dimension.height);

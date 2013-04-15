@@ -14,7 +14,7 @@ static const int moving_shapes_count = 50;
 
 dimension_t dimension = dimension_t(WIDTH, HEIGHT);
 
-StandardField field(dimension);
+ComposedField field(dimension, 4);
 
 void rectangle_draw(const shape_t& rectangle) {
     glRectf((float)rectangle.getPoint()->x, (float)rectangle.getPoint()->y, (float)(rectangle.getPoint()->x + rectangle.dimension.width),
@@ -96,7 +96,7 @@ void display(void)
 /* clear all pixels  */
     glClear (GL_COLOR_BUFFER_BIT);
 
-    vector<const shape_t *> *shapes = field.get_shapes();
+    vector<shape_t *> *shapes = field.get_shapes();
 
     for (unsigned int i = 0; i < shapes->size(); i++) {
         const shape_t *s = (*shapes)[i];

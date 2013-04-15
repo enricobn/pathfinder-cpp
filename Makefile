@@ -5,14 +5,16 @@ SAVE-TEMPS =
 #PROFILER = -pg
 PROFILER =
 CC = g++
-#DEBUG = -g
-DEBUG =
+DEBUG = -g
+#DEBUG =
 
 CFLAGS = -Wall -std=c++0x -c $(DEBUG) -O3 -pedantic $(SAVE-TEMPS) $(PROFILER)
 LFLAGS = -Wall $(DEBUG) -o bin/$@ $(PROFILER)
 GL = -lglut -lGLU
 
 all : configure field_test.bin move_example.bin container_test.bin List_test.bin
+
+Field.cpp : Field.hpp
 
 List_test.bin : obj/List_test.o
 	@echo 'Building $@'

@@ -1,7 +1,8 @@
 #include "globals.hpp"
 #include "Field.hpp"
+#include <algorithm>
 
-CField::CField(const dimension_t& dimension, const int subFields) : _dimension(dimension) {
+ComposedField::ComposedField(const dimension_t& dimension, const int subFields) : _dimension(dimension) {
 	if (dimension.width % subFields != 0) {
 		throw "invalid subFields";
 	}
@@ -24,7 +25,7 @@ CField::CField(const dimension_t& dimension, const int subFields) : _dimension(d
 	}
 }
 
-int CField::is_occupied(const point_t& point) const {
+int ComposedField::is_occupied(const point_t& point) const {
 	for (unsigned int i = 0; i < _subFields.size(); i++) {
 		SubField* subField = _subFields[i];
 		if (subField->contains(point)) {
@@ -34,22 +35,34 @@ int CField::is_occupied(const point_t& point) const {
 	return FALSE;
 }
 
-void CField::add(const shape_t *shape) {
+void ComposedField::add(shape_t *shape) {
 	for (unsigned int i = 0; i < _subFields.size(); i++) {
 		SubField* subField = _subFields[i];
-		if (subField->contains(shape)) {
+		if (subField->accepts(shape)) {
 			subField->add(shape);
+			shape->_shapeContainer = this;
 		}
 	}
     _shapes.push_back(shape);
 }
 
-CField::~CField() {
+ComposedField::~ComposedField() {
 
 }
 
-vector<const shape_t *> *CField::get_shapes() {
+vector<shape_t *> *ComposedField::get_shapes() {
     return &_shapes;
+}
+
+void ComposedField::shapeMoved(shape_t& shape, const point_t& point) {
+	for (unsigned int i = 0; i < _subFields.size(); i++) {
+		SubField* subField = _subFields[i];
+		subField->remove(&shape);
+		if (subField->accepts(&shape)) {
+			subField->add(&shape);
+		}
+	}
+
 }
 
 // StandardField
@@ -71,7 +84,7 @@ int StandardField::is_occupied(const point_t& point) const {
     return FALSE;
 }
 
-void StandardField::add(const shape_t *shape) {
+void StandardField::add(shape_t *shape) {
     _shapes.push_back(shape);
 }
 
@@ -79,8 +92,11 @@ StandardField::~StandardField() {
 
 }
 
-vector<const shape_t *> *StandardField::get_shapes() {
+vector<shape_t *> *StandardField::get_shapes() {
     return &_shapes;
+}
+
+void StandardField::shapeMoved(shape_t& shape, const point_t& point) {
 }
 
 // SubField
@@ -103,19 +119,32 @@ int SubField::is_occupied(const point_t& point) const {
     return FALSE;
 }
 
-void SubField::add(const shape_t *shape) {
+void SubField::add(shape_t *shape) {
     _shapes.push_back(shape);
+}
+
+void SubField::remove(const shape_t* shape) {
+	vector<shape_t*>::iterator i = find(_shapes.begin(), _shapes.end(), shape);
+	if (i != _shapes.end()) // == vector.end() means the element was not found
+		_shapes.erase(i);
 }
 
 SubField::~SubField() {
 
 }
 
-vector<const shape_t *> *SubField::get_shapes() {
+vector<shape_t *> *SubField::get_shapes() {
     return &_shapes;
 }
 
-int SubField::contains(const shape_t* shape) const {
-	return contains(*shape->getPoint());
+int SubField::accepts(const shape_t* shape) const {
+	return contains(*shape->getPoint()) ||
+			contains(shape->getPoint()->x + shape->dimension.width -1, shape->getPoint()->y) ||
+			contains(shape->getPoint()->x + shape->dimension.width -1, shape->getPoint()->y + shape->dimension.height -1) ||
+			contains(shape->getPoint()->x, shape->getPoint()->y + shape->dimension.height);
+}
+
+void SubField::shapeMoved(shape_t& shape, const point_t& point) {
+
 }
 

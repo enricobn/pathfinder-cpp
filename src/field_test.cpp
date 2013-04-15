@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv) {
     dimension_t dimension = dimension_t(100, 100);
-    CField field = CField::CField(dimension, 4);
+    ComposedField field = ComposedField::ComposedField(dimension, 4);
 
     /* test contains */ 
 
