@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv) {
     dimension_t dimension = dimension_t(100, 100);
-    ComposedField field(dimension, 4);
+    StandardField field(dimension);
 
     /* test contains */ 
 
@@ -21,10 +21,10 @@ int main(int argc, char** argv) {
 
     /* test is_occupied */ 
     
-    shape_t r1 = {{0, 0}, {10, 10}};
+    Rectangle r1({0, 0}, {10, 10}, 1.0, 1.0, 1.0);
     field.add(&r1);
 
-    shape_t r2 = {{20, 20}, {10, 10}};
+    Rectangle r2({20, 20}, {10, 10}, 1.0, 1.0, 1.0);
     field.add(&r2);
     
     point_t p5 = {5, 5};

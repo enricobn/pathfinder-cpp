@@ -1,33 +1,14 @@
 #include <stdio.h>
 #include <vector>
 #include <unordered_map>
+#include <GL/gl.h>
+#include <GL/glut.h>
+#include "Geometry.hpp"
+#include "globals.hpp"
 using namespace std;
 
 #ifndef FIELD_H_
 #define FIELD_H_
-
-struct point_t;
-
-struct point_t {
-    int x;
-    int y;
-
-    inline bool operator<(const point_t &other) const {
-    	if (x == other.x) {
-    		return y < other.y;
-    	} else {
-    		return x < other.x;
-    	}
-    }
-
-    inline bool operator==(const point_t &other) const {
-    	return x == other.x && y == other.y;
-    }
-
-    void print() {
-        printf("(%d, %d)", x, y);
-    }
-};
 
 struct point_t_hash {
 	inline size_t operator()(const point_t& point) const {
@@ -35,89 +16,70 @@ struct point_t_hash {
 	}
 };
 
-struct dimension_t {
-    int width;
-    int height;
+class ShapeContainer;
 
-    dimension_t(const int width, const int height) {
-    	this->width = width;
-    	this->height = height;
-    }
+class Shape {
+protected:
+	ShapeContainer *_container;
+	point_t _point;
+public:
+	Shape(point_t point);
 
-    void operator=(dimension_t& d) {
-    	this->width = d.width;
-    	this->height = d.height;
-    }
+	virtual ~Shape();
 
-    void print() const {
-        printf("(%d, %d)", width, height);
-    }
+	void setContainer(ShapeContainer *container);
+
+	point_t getPoint();
+
+	void setPoint(point_t point);
+
+	virtual dimension_t getDimension() = 0;
+
+	virtual void draw() const = 0;
 };
 
-struct shape_t;
+class Rectangle : public Shape {
+private:
+	const dimension_t _dimension;
+	const GLfloat _red;
+	const GLfloat _green;
+	const GLfloat _blue;
+public:
+	Rectangle(point_t point, const dimension_t dimension,	const GLfloat red,	const GLfloat green,
+			const GLfloat blue);
+
+	dimension_t getDimension();
+
+	void draw() const;
+
+};
 
 class ShapeContainer {
-
+protected:
+    vector<Shape*> _shapes;
 public:
-    virtual int is_occupied(const point_t&) const = 0;
+    vector<Shape*> get_shapes() {
+    	return _shapes;
+    }
 
     virtual int contains(const point_t&) const = 0;
 
-    virtual void add(shape_t *) = 0;
+    virtual void add(Shape* shape) = 0;
 
-    virtual vector<shape_t *> *get_shapes() = 0;
+    virtual void shapeBeforeMove(Shape*, point_t&) = 0;
 
-    virtual void shapeBeforeMove(shape_t&, const point_t&) = 0;
+    virtual int is_occupied(const point_t& point) const;
 
     virtual ~ShapeContainer() {}
 
 };
 
-struct shape_t {
-private:
-    point_t _point;
-public:
-    const dimension_t dimension;
-
-	ShapeContainer* _shapeContainer;
-
-    shape_t(const point_t& point, const dimension_t& dimension) :
-    	_point(point), dimension(dimension)
-    {
-    	_shapeContainer = 0;
-    	draw = 0;
-    }
-
-    void (*draw)(const shape_t&);
-
-    const point_t* getPoint() const {
-    	return &_point;
-    }
-
-    void setPoint(const point_t& point) {
-    	if (_shapeContainer != 0) {
-    		_shapeContainer->shapeBeforeMove(*this, point);
-    	}
-    	_point = point;
-    }
-
-    void print() {
-        printf("shape p");
-        _point.print();
-        printf(" d");
-        dimension.print();
-    };
-};
-
 class SubField : public ShapeContainer {
     private:
-        vector<shape_t *> _shapes;
         const point_t _point;
         const dimension_t _dimension;
     public:
         SubField(const point_t&, const dimension_t&);
-
-        int is_occupied(const point_t&) const;
 
         int contains(const point_t&) const;
 
@@ -127,13 +89,11 @@ class SubField : public ShapeContainer {
 
         int containsEntirely(const point_t& point, const dimension_t& dimension) const;
 
-        void remove(const shape_t*);
+        void shapeBeforeMove(Shape *shape, point_t& point);
 
-        void add(shape_t *);
+        void remove(Shape*);
 
-        vector<shape_t *> *get_shapes();
-
-        void shapeBeforeMove(shape_t&, const point_t&);
+        void add(Shape* shape);
 
         virtual ~SubField();
 };
@@ -156,20 +116,15 @@ inline int SubField::contains(const point_t& point) const {
 
 class StandardField : public ShapeContainer {
     private:
-        vector<shape_t *> _shapes;
         const dimension_t _dimension;
     public:
         StandardField(const dimension_t&);
 
-        int is_occupied(const point_t&) const;
-
         int contains(const point_t&) const;
 
-        void add(shape_t *);
+        void shapeBeforeMove(Shape*, point_t&);
 
-        vector<shape_t *> *get_shapes();
-
-        void shapeBeforeMove(shape_t&, const point_t&);
+        void add(Shape* shape);
 
         virtual ~StandardField();
 };
@@ -185,21 +140,18 @@ inline int StandardField::contains(const point_t& point) const {
 
 class ComposedField : public ShapeContainer {
     private:
-        vector<shape_t *> _shapes;
         const dimension_t _dimension;
         vector<SubField*> _subFields;
     public:
         ComposedField(const dimension_t&, const int);
 
-        int is_occupied(const point_t&) const;
-
         int contains(const point_t&) const;
 
-        void add(shape_t *);
+        void shapeBeforeMove(Shape*, point_t&);
 
-        vector<shape_t *> *get_shapes();
+        void add(Shape* shape);
 
-        void shapeBeforeMove(shape_t&, const point_t&);
+        int is_occupied(const point_t& point) const;
 
         virtual ~ComposedField();
 };

@@ -2,6 +2,9 @@
  * move_example.c
  * This is a path finding example using ASearch
  * 14 Apr 2013 time 6.590
+ *
+ * 27 Jul 2013 - refactored shape_t as Shape class with a Rectangle subclass
+ *  time 6.810
  */
 #include <unistd.h>
 #include <GL/glut.h>
@@ -17,73 +20,73 @@ dimension_t dimension = dimension_t(WIDTH, HEIGHT);
 
 ComposedField field(dimension, 4);
 
-void rectangle_draw(const shape_t& rectangle) {
-    glRectf((float)rectangle.getPoint()->x, (float)rectangle.getPoint()->y, (float)(rectangle.getPoint()->x + rectangle.dimension.width),
-        (float)(rectangle.getPoint()->y + rectangle.dimension.height));
-}
+//void rectangle_draw(const shape_t& rectangle) {
+//    glRectf((float)rectangle.getPoint()->x, (float)rectangle.getPoint()->y, (float)(rectangle.getPoint()->x + rectangle.dimension.width),
+//        (float)(rectangle.getPoint()->y + rectangle.dimension.height));
+//}
 
 typedef struct {
-    shape_t *shape;
+    Shape *shape;
     point_t end;
 } moving_shape_t;
 
 moving_shape_t *moving_shapes = NULL;
 
-shape_t *rectangle_new(int x, int y, int width, int height, void (*draw)(const shape_t& shape)) {
-//    shape_t *r = (shape_t *) malloc(sizeof(shape_t));
-	shape_t* r = new shape_t({x,y}, {width, height});
-//    r->getPoint().x = x;
-//    r->getPoint().y = y;
-//    r->dimension.width = width;
-//    r->dimension.height = height;
-    r->draw = draw;
-    return r;
-}
-
-void white_draw(const shape_t& rectangle) {
-    glColor3f(1.0, 1.0, 1.0);
-    rectangle_draw(rectangle);
-}
-
-void blue_draw(const shape_t& rectangle) {
-    glColor3f(0.0, 0.0, 1.0);
-    rectangle_draw(rectangle);
-}
-
-void red_draw(const shape_t& rectangle) {
-    glColor3f(1.0, 0.0, 0.0);
-    rectangle_draw(rectangle);
-}
-
-void green_draw(const shape_t& rectangle) {
-    glColor3f(0.0, 1.0, 0.0);
-    rectangle_draw(rectangle);
-}
+//shape_t *rectangle_new(int x, int y, int width, int height, void (*draw)(const shape_t& shape)) {
+////    shape_t *r = (shape_t *) malloc(sizeof(shape_t));
+//	shape_t* r = new shape_t({x,y}, {width, height});
+////    r->getPoint().x = x;
+////    r->getPoint().y = y;
+////    r->dimension.width = width;
+////    r->dimension.height = height;
+//    r->draw = draw;
+//    return r;
+//}
+//
+//void white_draw(const shape_t& rectangle) {
+//    glColor3f(1.0, 1.0, 1.0);
+//    rectangle_draw(rectangle);
+//}
+//
+//void blue_draw(const shape_t& rectangle) {
+//    glColor3f(0.0, 0.0, 1.0);
+//    rectangle_draw(rectangle);
+//}
+//
+//void red_draw(const shape_t& rectangle) {
+//    glColor3f(1.0, 0.0, 0.0);
+//    rectangle_draw(rectangle);
+//}
+//
+//void green_draw(const shape_t& rectangle) {
+//    glColor3f(0.0, 1.0, 0.0);
+//    rectangle_draw(rectangle);
+//}
 
 void field_init() {
 //	dimension_t d;
 //	d = {WIDTH, HEIGHT};
 //    field = CField(d);
 
-    field.add(rectangle_new(10, 10, 10, 10, white_draw));
+    field.add(new Rectangle({10, 10}, {10, 10}, 1.0, 1.0, 1.0));
 
-    field.add(rectangle_new(40, 20, 20, 20, white_draw));
+    field.add(new Rectangle({40, 20}, {20, 20}, 1.0, 1.0, 1.0));
     
-    field.add(rectangle_new(40, 60, 20, 20, white_draw));
+    field.add(new Rectangle({40, 60}, {20, 20}, 1.0, 1.0, 1.0));
 
-    field.add(rectangle_new(75, 75, 10, 10, white_draw));
+    field.add(new Rectangle({75, 75}, {10, 10}, 1.0, 1.0, 1.0));
     
     moving_shapes = (moving_shape_t *) malloc(sizeof(moving_shape_t) * moving_shapes_count * 2);    
     
     int i;
     for (i = 0; i < moving_shapes_count; i++) {
-        shape_t *p1 = rectangle_new(0, moving_shapes_count -i, 1, 1, red_draw);
+        Shape *p1 = new Rectangle({0, moving_shapes_count -i}, {1, 1}, 1.0, 0.0, 0.0);
         moving_shapes[2 * i].shape = p1;
         moving_shapes[2 * i].end.x = 90;
         moving_shapes[2 * i].end.y = 99 -i;
         field.add(p1);
 
-        shape_t *p2 = rectangle_new(90, 99 -i, 1, 1, blue_draw);
+        Shape *p2 = new Rectangle({90, 99 -i}, {1, 1}, 0.0, 0.0, 1.0);
         moving_shapes[2 * i +1].shape = p2;
         moving_shapes[2 * i + 1].end.x = 0;
         moving_shapes[2 * i + 1].end.y = moving_shapes_count -i;
@@ -97,12 +100,14 @@ void display(void)
 /* clear all pixels  */
     glClear (GL_COLOR_BUFFER_BIT);
 
-    vector<shape_t *> *shapes = field.get_shapes();
+    vector<Shape *> shapes = field.get_shapes();
 
-    for (unsigned int i = 0; i < shapes->size(); i++) {
-        const shape_t *s = (*shapes)[i];
+    for(std::vector<Shape *>::iterator it = shapes.begin(); it != shapes.end(); ++it) {
+//
+//    for (unsigned int i = 0; i < shapes.size(); i++) {
+//        Shape *s = shapes[i];
         glColor3f (1.0, 1.0, 1.0);
-        s->draw(*s);
+        (*it)->draw();
     }
 
 /*   
@@ -131,10 +136,10 @@ void animate() {
     for (int i = 0; i < moving_shapes_count * 2; i++) {
 //        printf("moving_shape %d ", i);
 //        moving_shapes[i].shape->print();
-        if (*(moving_shapes[i].shape->getPoint()) == moving_shapes[i].end) {
+        if (moving_shapes[i].shape->getPoint() == moving_shapes[i].end) {
             continue;
         }
-        point_t *point = get_next_to_path(field, *(moving_shapes[i].shape->getPoint()), moving_shapes[i].end);
+        point_t *point = get_next_to_path(field, moving_shapes[i].shape->getPoint(), moving_shapes[i].end);
         if (point == NULL) {
 /*            printf("empty path\n");*/
             continue;

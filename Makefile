@@ -17,6 +17,8 @@ GL = -lglut -lGLU
 
 all : configure field_test.bin move_example.bin container_test.bin List_test.bin
 
+Shape.cpp : Shape.hpp
+
 Field.cpp : Field.hpp
 
 List_test.bin : obj/List_test.o
@@ -33,7 +35,7 @@ move_example.bin : obj/move_example.o obj/astar_pathfinder.o obj/Field.o obj/Pat
 
 field_test.bin : obj/field_test.o obj/Field.o obj/PathNode.o obj/NodesMap.o
 	@echo 'Building $@ with $^'
-	$(CC) $(LFLAGS) $^
+	$(CC) $(LFLAGS) $(GL) $^
 
 obj/%.o : %.cpp
 	@echo 'Compiling $<'
