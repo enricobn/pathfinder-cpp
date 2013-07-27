@@ -12,7 +12,7 @@ void Shape::setContainer(ShapeContainer *container) {
 	_container = container;
 }
 
-point_t Shape::getPoint() {
+point_t Shape::getPoint() const {
  	return _point;
 }
 
@@ -36,7 +36,7 @@ void Rectangle::draw() const {
 
 }
 
-dimension_t Rectangle::getDimension() {
+dimension_t Rectangle::getDimension() const {
 	return _dimension;
 }
 

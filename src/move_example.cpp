@@ -4,7 +4,8 @@
  * 14 Apr 2013 time 6.590
  *
  * 27 Jul 2013 - refactored shape_t as Shape class with a Rectangle subclass
- *  time 6.810
+ * ComposedField(4) time  6.810
+ * StandardField 	time 10.200
  */
 #include <unistd.h>
 #include <GL/glut.h>
@@ -18,8 +19,8 @@ static const int moving_shapes_count = 50;
 
 dimension_t dimension = dimension_t(WIDTH, HEIGHT);
 
-ComposedField field(dimension, 4);
-
+//ComposedField field(dimension, 4);
+StandardField field(dimension);
 //void rectangle_draw(const shape_t& rectangle) {
 //    glRectf((float)rectangle.getPoint()->x, (float)rectangle.getPoint()->y, (float)(rectangle.getPoint()->x + rectangle.dimension.width),
 //        (float)(rectangle.getPoint()->y + rectangle.dimension.height));

@@ -29,11 +29,11 @@ public:
 
 	void setContainer(ShapeContainer *container);
 
-	point_t getPoint();
+	point_t getPoint() const;
 
 	void setPoint(point_t point);
 
-	virtual dimension_t getDimension() = 0;
+	virtual dimension_t getDimension() const = 0;
 
 	virtual void draw() const = 0;
 };
@@ -48,7 +48,7 @@ public:
 	Rectangle(point_t point, const dimension_t dimension,	const GLfloat red,	const GLfloat green,
 			const GLfloat blue);
 
-	dimension_t getDimension();
+	dimension_t getDimension() const;
 
 	void draw() const;
 
