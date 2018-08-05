@@ -87,9 +87,8 @@ PathNode *get_path_internal(ShapeContainer& field, point_t from, point_t to) {
         int min = INT_MAX;
         PathNode *min_node = NULL;
 
-        for( unordered_map<point_t,PathNode *>::iterator ii=open->begin(); ii!= open->end(); ++ii) {
-//        for( map<point_t,PathNode *>::iterator ii=open->begin(); ii!= open->end(); ++ii) {
-        	PathNode *node = (*ii).second;
+        for( auto ii=open->begin(); ii!= open->end(); ++ii) {
+        	PathNode *node = ii->second;
             if (min_node == NULL || node->get_F() < min) {
                 min = node->get_F();
                 min_node = node;
@@ -124,14 +123,14 @@ PathNode *get_path_internal(ShapeContainer& field, point_t from, point_t to) {
 				// I do not consider the end point to be occupied, so I can move towards it
 				if (field.contains(adjacent) && (adjacent == to || !field.is_occupied(adjacent))) {
 //					map<point_t,PathNode *>::iterator iClosed = closed->find(adjacent);
-					unordered_map<point_t,PathNode *>::iterator iClosed = closed->find(adjacent);
+					auto iClosed = closed->find(adjacent);
 					if (iClosed == closed->end()) {
 						PathNode *node = new PathNode(min_node, adjacent, to);
 						if (node == NULL) {
 							ERROR("Error allocating new node");
 						}
 //						PathNode *got = openMap->find(adjacent);
-						unordered_map<point_t,PathNode *>::iterator iOpen = open->find(adjacent);
+						auto iOpen = open->find(adjacent);
 						//map<point_t,PathNode *>::iterator iOpen = open->find(adjacent);
 						if (iOpen == open->end()) {
 //						if (got == NULL) {
@@ -158,6 +157,26 @@ PathNode *get_path_internal(ShapeContainer& field, point_t from, point_t to) {
 
         closed->insert(pair<point_t,PathNode *>(min_node->get_point(), min_node));
     }
+
+
+	// #ifdef FPRINT
+	// 	auto to_print = target_node;
+
+	// 	fprintf(file, "result path");
+
+	// 	while (to_print != NULL) {
+	// 		/* the path can contains occupied points. Typically it can be only the end point */
+	// 		if (to_print->get_point() != from) {
+	// 			// I cannot do: point = &target_node->get_point();
+	// 			// since it's an address of a temporary, then I get a warning
+	// 			point_t node_point = to_print->get_point();
+	// 			fprintf(file, "(%d,%d),", node_point.x, node_point.y);
+	// 		}
+	// 		to_print = to_print->get_parent();
+	// 	}
+	// 	fprintf(file, "\n");
+	// #endif
+
     return target_node;
 }
 
@@ -183,31 +202,43 @@ point_t *get_next_to_path(ShapeContainer& field, point_t from, point_t to) {
         return NULL;
     }
 
-    point_t *point = NULL;   
-    
+    point_t *point = NULL;
+
+	#ifdef FPRINT
+		fprintf(file, "result path");
+	#endif
+
     while (target_node != NULL) {
-        /* the path can contains occupied points. Typically it can be only the end point */
-        if (!field.is_occupied(target_node->get_point())) {
+        // I don't want the from point
+        if (from != target_node->get_point()) {
         	// I cannot do: point = &target_node->get_point();
         	// since it's an address of a temporary, then I get a warning
-        	point_t node_point = target_node->get_point();
-            point = &node_point;
+			// I don't know why I must memcopy here all the points, but if I only assign node_point to point then
+			// memcopy point outside the cycle, it does not work!
+			auto node_point = target_node->get_point();
+			if (point == NULL)
+				point = (point_t *)malloc(sizeof(point_t));
+			memcpy(point, &node_point, sizeof(point_t));
+			
+			#ifdef FPRINT
+				fprintf(file, "(%d,%d) ", point->x, point->y);
+			#endif	
         }
         target_node = target_node->get_parent();
     }
 
-    /* I copy it so I can completely free open and closed vectors */
-    point_t *result = NULL;
+	#ifdef FPRINT
+		fprintf(file, "\n");
+	#endif
+
     if (point != NULL) {
-        result = (point_t *)malloc(sizeof(point_t));
-        memcpy(result, point, sizeof(point_t));
-		#ifdef PRINT
-        	printf("(%d,%d)\n", result->x, result->y);
+		#ifdef FPRINT
+        	fprintf(file, "result (%d,%d)\n", point->x, point->y);
 		#endif
     }
     
     clear(open);
     clear(closed);
 
-    return result;
+    return point;
 }

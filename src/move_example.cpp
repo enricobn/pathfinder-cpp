@@ -137,16 +137,19 @@ void animate() {
     for (int i = 0; i < moving_shapes_count * 2; i++) {
 //        printf("moving_shape %d ", i);
 //        moving_shapes[i].shape->print();
-        if (moving_shapes[i].shape->getPoint() == moving_shapes[i].end) {
+        auto from = moving_shapes[i].shape->getPoint();
+        auto to = moving_shapes[i].end;
+        
+        if (moving_shapes[i].shape->getPoint() == to) {
             continue;
         }
-        point_t *point = get_next_to_path(field, moving_shapes[i].shape->getPoint(), moving_shapes[i].end);
+
+        point_t *point = get_next_to_path(field, from, to);
+
         if (point == NULL) {
-/*            printf("empty path\n");*/
-            continue;
-/*            ERROR("No path found!\n");
+            printf("empty path\n");
             exit(1);
-*/
+            continue;
         }
         
 //        moving_shapes[i].shape->point.x = point->x;

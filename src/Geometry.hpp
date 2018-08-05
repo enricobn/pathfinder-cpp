@@ -26,6 +26,10 @@ struct point_t {
     	return x == other.x && y == other.y;
     }
 
+    inline bool operator!=(const point_t &other) const {
+    	return !(*this == other);
+    }
+
     void print() {
         printf("(%d, %d)", x, y);
     }

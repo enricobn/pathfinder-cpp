@@ -11,11 +11,11 @@ DEBUG =
 
 CC = g++
 
-CFLAGS = -Wall -std=c++0x -c $(DEBUG) -O3 -pedantic $(SAVE-TEMPS) $(PROFILER)
+CFLAGS = -Wall -std=c++0x -c $(DEBUG) -O3 $(SAVE-TEMPS) $(PROFILER)
 LFLAGS = -Wall $(DEBUG) -o bin/$@ $(PROFILER)
-GL = -lglut -lGLU
+GL = -lglut -lGLU -lGL
 
-all : configure field_test.bin move_example.bin container_test.bin List_test.bin
+all : configure field_test.bin move_example.bin List_test.bin
 
 Shape.cpp : Shape.hpp
 
@@ -25,17 +25,13 @@ List_test.bin : obj/List_test.o
 	@echo 'Building $@'
 	$(CC) $(LFLAGS) $^
 
-container_test.bin : obj/container_test.o
-	@echo 'Building $@'
-	$(CC) $(LFLAGS) $^
-
 move_example.bin : obj/move_example.o obj/astar_pathfinder.o obj/Field.o obj/PathNode.o obj/NodesMap.o
 	@echo 'Building $@'
-	$(CC) $(LFLAGS) $(GL) $^
+	$(CC) $(LFLAGS) $^ $(GL)
 
 field_test.bin : obj/field_test.o obj/Field.o obj/PathNode.o obj/NodesMap.o
 	@echo 'Building $@ with $^'
-	$(CC) $(LFLAGS) $(GL) $^
+	$(CC) $(LFLAGS) $^ $(GL)
 
 obj/%.o : %.cpp
 	@echo 'Compiling $<'
