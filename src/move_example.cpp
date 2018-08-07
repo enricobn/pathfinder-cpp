@@ -1,17 +1,16 @@
 /*
  * move_example.c
  * This is a path finding example using ASearch
- * 14 Apr 2013 time 6.590
- *
- * 27 Jul 2013 - refactored shape_t as Shape class with a Rectangle subclass
- * ComposedField(4) time  6.810
- * StandardField 	time 10.200
+ * 
+ * Intel(R) Core(TM) i7 CPU       M 620  @ 2.67GHz
+ * Completed in 6.027212 secs.
  */
 #include <unistd.h>
 #include <GL/glut.h>
 #include "globals.hpp"
 #include "Field.hpp"
 #include "astar_pathfinder.hpp"
+using namespace std;
 
 const int WIDTH = 100;
 const int HEIGHT = 100;
@@ -32,6 +31,8 @@ typedef struct {
 } moving_shape_t;
 
 moving_shape_t *moving_shapes = NULL;
+bool ended = false;
+clock_t *start_time = NULL;
 
 //shape_t *rectangle_new(int x, int y, int width, int height, void (*draw)(const shape_t& shape)) {
 ////    shape_t *r = (shape_t *) malloc(sizeof(shape_t));
@@ -134,11 +135,18 @@ void display(void)
 
 void animate() {
 //    printf("animate start\n");
+
+    bool completed = true;
+
     for (int i = 0; i < moving_shapes_count * 2; i++) {
 //        printf("moving_shape %d ", i);
 //        moving_shapes[i].shape->print();
         auto from = moving_shapes[i].shape->getPoint();
         auto to = moving_shapes[i].end;
+
+        if (from != to) {
+            completed = false;
+        }
         
         if (moving_shapes[i].shape->getPoint() == to) {
             continue;
@@ -159,7 +167,12 @@ void animate() {
         free(point);
     }
 
-
+    if (completed && !ended) {
+        auto time = clock();
+        double elapsed_secs = double(time - *start_time) / CLOCKS_PER_SEC;
+        printf("Completed in %f secs.\n", elapsed_secs);
+        ended = true;
+    }
 /* 
     Normally openGL doesn't continuously draw frames. It puts one in place and waits for you to tell him what to do next.
      Calling glutPostRedisplay() forces a redraw with the new angle
@@ -188,7 +201,10 @@ void init (void)
  * Enter main loop and process events.
  */
 int main(int argc, char** argv)
-{
+{   
+    auto time = clock();
+    start_time = &time;
+
     field_init();
     glutInit(&argc, argv);
     glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
@@ -196,6 +212,7 @@ int main(int argc, char** argv)
     glutInitWindowPosition (100, 100);
     glutCreateWindow ("Path example");
     init ();
+
     glutDisplayFunc(display);
     glutIdleFunc(animate);
     glutMainLoop();
